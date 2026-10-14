@@ -5,10 +5,13 @@ import { getAuthErrorMessage } from "@/lib/auth/messages";
 import {
   signInSchema,
   signUpSchema,
-  type AuthFieldErrors,
 } from "@/lib/auth/validation";
-import type { AuthActionState } from "@/lib/auth/action-state";
+import type {
+  AuthActionState,
+  AuthFieldErrors,
+} from "@/lib/auth/action-state";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { z } from "zod";
 
 function getFieldErrors(
   issues: { path: PropertyKey[]; message: string }[],
@@ -40,11 +43,10 @@ function readFormData(formData: FormData) {
 }
 
 function getSiteUrl(): string | null {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const parsed = z.string().url().safeParse(process.env.NEXT_PUBLIC_SITE_URL);
+  if (!parsed.success) return null;
 
-  if (!siteUrl) return null;
-
-  const parsedSiteUrl = new URL(siteUrl);
+  const parsedSiteUrl = new URL(parsed.data);
   if (
     parsedSiteUrl.protocol !== "https:" &&
     parsedSiteUrl.hostname !== "localhost" &&
@@ -149,7 +151,7 @@ export async function signUp(
   };
 }
 
-export async function signOut(_formData: FormData): Promise<void> {
+export async function signOut(): Promise<void> {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase) {

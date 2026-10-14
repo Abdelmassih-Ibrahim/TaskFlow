@@ -64,11 +64,8 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  const {
-    data: { claims },
-    error,
-  } = await supabase.auth.getClaims();
-  const isAuthenticated = !error && Boolean(claims?.sub);
+  const { data, error } = await supabase.auth.getClaims();
+  const isAuthenticated = !error && Boolean(data?.claims?.sub);
   const pathname = request.nextUrl.pathname;
 
   if (!isAuthenticated && !isPublicPath) {
