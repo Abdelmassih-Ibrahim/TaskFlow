@@ -132,7 +132,11 @@ export function TaskTable({
                     </span>
                   </td>
                   <td className="px-4 py-3.5">
-                    <div className="flex -space-x-1.5" aria-label={`Assigned to ${task.assignees.join(", ")}`}>
+                    <div
+                      role="group"
+                      aria-label={`Assigned to ${task.assignees.join(", ")}`}
+                      className="flex -space-x-1.5"
+                    >
                       {task.assignees.map((assignee, index) => (
                         <span
                           key={assignee}

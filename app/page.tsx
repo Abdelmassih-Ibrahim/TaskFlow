@@ -16,6 +16,12 @@ export default function DashboardPage() {
   const tasks = getDemoTasks(today);
   const summary = getTaskSummary(tasks, today);
   const firstName = "Alex";
+  const greeting =
+    today.getHours() < 12
+      ? "Good morning"
+      : today.getHours() < 18
+        ? "Good afternoon"
+        : "Good evening";
   const formattedToday = today.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -23,7 +29,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <main id="dashboard" className="min-w-0 flex-1 px-5 pb-12 pt-7 sm:px-8 lg:px-10 lg:pt-10">
+    <main id="dashboard" className="min-w-0 flex-1 px-5 pb-12 pt-7 sm:px-8 lg:ml-[248px] lg:px-10 lg:pt-10">
       <div className="mx-auto max-w-[1320px]">
         <div className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
@@ -31,7 +37,7 @@ export default function DashboardPage() {
               {formattedToday}
             </p>
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-[34px]">
-              Good morning, {firstName}
+              {greeting}, {firstName}
               <span className="text-teal-600">.</span>
             </h1>
             <p className="mt-2 text-[15px] text-slate-500">
