@@ -15,8 +15,13 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { signOut } from "@/app/actions/auth";
+
+async function submitSignOut(): Promise<null> {
+  await signOut();
+  return null;
+}
 
 const primaryNavigation = [
   { label: "Dashboard", href: "#dashboard", icon: LayoutDashboard, active: true },
@@ -36,6 +41,8 @@ function SidebarContent({
   email: string;
   onNavigate?: () => void;
 }) {
+  const [, signOutAction, signingOut] = useActionState(submitSignOut, null);
+
   return (
     <>
       <div className="flex h-[76px] items-center gap-3 px-6">
@@ -139,14 +146,15 @@ function SidebarContent({
             <p className="truncate text-[10px] text-slate-500">Signed in</p>
           </div>
         </div>
-        <form action={signOut} className="mt-2">
+        <form action={signOutAction} className="mt-2">
           <button
             type="submit"
+            disabled={signingOut}
             onClick={onNavigate}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white disabled:cursor-wait disabled:opacity-60"
           >
             <LogOut size={16} aria-hidden="true" className="text-slate-500" />
-            Sign out
+            {signingOut ? "Signing out..." : "Sign out"}
           </button>
         </form>
       </div>

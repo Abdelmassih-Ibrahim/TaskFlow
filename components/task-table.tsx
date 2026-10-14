@@ -52,6 +52,7 @@ function TaskActions({
       <DeleteRecordButton
         id={task.id}
         label="Delete"
+        ariaLabel={`Delete task ${task.title}`}
         confirmMessage={`Delete “${task.title}”? This cannot be undone.`}
         action={deleteTask}
       />
@@ -122,7 +123,11 @@ export function TaskTable({
                   <td className="px-4 py-3.5 text-xs text-slate-500">{task.project.name}</td>
                   <td className={`px-4 py-3.5 text-xs ${overdue ? "font-medium text-rose-600" : "text-slate-500"}`}>
                     {task.due_date ? formatDueDate(task.due_date, today) : "No due date"}
-                    {overdue && <span className="ml-1.5 text-[10px] text-rose-400">overdue</span>}
+                    {overdue && (
+                      <span className="ml-1.5 text-[10px] font-semibold text-rose-700">
+                        Overdue
+                      </span>
+                    )}
                   </td>
                   <td className={`px-4 py-3.5 text-xs font-medium ${priorityStyles[task.priority]}`}>
                     <span className={`mr-1.5 inline-block size-1.5 rounded-full align-middle ${task.priority === "high" ? "bg-rose-500" : task.priority === "medium" ? "bg-amber-500" : "bg-slate-300"}`} />
@@ -172,7 +177,7 @@ export function TaskTable({
                 </span>
                 <span className={overdue ? "font-medium text-rose-600" : ""}>
                   {task.due_date ? formatDueDate(task.due_date, today) : "No due date"}
-                  {overdue ? " · overdue" : ""}
+                  {overdue ? " · Overdue" : ""}
                 </span>
               </div>
             </li>

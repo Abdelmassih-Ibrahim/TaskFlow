@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -7,8 +8,9 @@ import {
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   initialWorkspaceActionState,
-  type WorkspaceData,
+  type WorkspaceActionState,
 } from "@/lib/workspace/validation";
+import type { WorkspaceData } from "@/lib/workspace/types";
 import { WorkspaceDashboard } from "./workspace-dashboard";
 import { ProjectDialog, TaskDialog } from "./workspace-dialogs";
 
@@ -82,7 +84,6 @@ beforeEach(() => {
     mock.mockReset();
     mock.mockResolvedValue(initialWorkspaceActionState);
   });
-  vi.stubGlobal("confirm", vi.fn(() => true));
 });
 
 describe("workspace dashboard", () => {
@@ -132,6 +133,14 @@ describe("workspace dashboard", () => {
     expect(screen.queryByText("Start with a project")).not.toBeInTheDocument();
   });
 
+  it("displays the sign-out failure notice returned by the server action", () => {
+    render(<WorkspaceDashboard {...workspace} signOutError />);
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "We couldn't sign you out. Please try again.",
+    );
+  });
+
   it("clears active filters from the task list", () => {
     render(<WorkspaceDashboard {...workspace} />);
     fireEvent.change(screen.getByRole("combobox", { name: "Filter by priority" }), {
@@ -168,5 +177,57 @@ describe("project and task forms", () => {
     expect(screen.getByLabelText("Status")).toHaveValue("todo");
     expect(screen.getByLabelText("Priority")).toHaveValue("medium");
     expect(screen.getByLabelText("Due date")).toHaveAttribute("type", "date");
+  });
+
+  it("associates a server validation error with the project name field", async () => {
+    mocks.createProject.mockResolvedValue({
+      status: "error",
+      message: "Check the fields below and try again.",
+      fieldErrors: { name: "Enter a project name." },
+    });
+    const { container } = render(
+      <ProjectDialog project={null} onClose={vi.fn()} />,
+    );
+    const form = container.querySelector("form");
+    if (!form) throw new Error("Project form did not render.");
+
+    fireEvent.submit(form);
+
+    expect(await screen.findByText("Enter a project name.")).toBeVisible();
+    expect(screen.getByLabelText("Project name")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Check the fields below and try again.",
+    );
+  });
+
+  it("disables project form actions while a save is pending", async () => {
+    let resolveAction: ((state: WorkspaceActionState) => void) | undefined;
+    mocks.createProject.mockImplementation(
+      () =>
+        new Promise<WorkspaceActionState>((resolve) => {
+          resolveAction = resolve;
+        }),
+    );
+    render(<ProjectDialog project={null} onClose={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText("Project name"), {
+      target: { value: "Portfolio work" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Create project" }));
+
+    const submitButton = await screen.findByRole("button", {
+      name: "Saving...",
+    });
+    expect(submitButton).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+
+    await act(async () => {
+      resolveAction?.({
+        status: "error",
+        message: "The test request has finished.",
+      });
+    });
   });
 });

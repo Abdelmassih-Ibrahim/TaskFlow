@@ -45,14 +45,17 @@ export function WorkspaceDashboard({
   projects,
   tasks,
   error,
-}: WorkspaceData) {
+  signOutError = false,
+}: WorkspaceData & { signOutError?: boolean }) {
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<TaskStatus | "all">("all");
   const [priority, setPriority] = useState<TaskPriority | "all">("all");
   const [projectId, setProjectId] = useState("");
   const [sort, setSort] = useState<TaskSort>("due_date");
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(() =>
+    signOutError ? "We couldn't sign you out. Please try again." : null,
+  );
   const dialogTriggerRef = useRef<HTMLElement | null>(null);
   const openDialog = useCallback(
     (dialog: Exclude<ActiveDialog, null>, trigger: HTMLElement) => {
@@ -72,6 +75,12 @@ export function WorkspaceDashboard({
     dialogTriggerRef.current = null;
   }, [activeDialog]);
 
+  useEffect(() => {
+    if (signOutError) {
+      setNotice("We couldn't sign you out. Please try again.");
+    }
+  }, [signOutError]);
+
   const summary = useMemo(() => getWorkspaceSummary(tasks), [tasks]);
   const filteredTasks = useMemo(
     () =>
@@ -84,13 +93,6 @@ export function WorkspaceDashboard({
       }),
     [priority, projectId, search, sort, status, tasks],
   );
-  const tasksByProject = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const task of tasks) {
-      counts.set(task.project_id, (counts.get(task.project_id) ?? 0) + 1);
-    }
-    return counts;
-  }, [tasks]);
   const progressByProject = useMemo(
     () =>
       new Map(
@@ -322,19 +324,21 @@ export function WorkspaceDashboard({
                   </div>
                 ) : (
                   <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    {projects.map((project) => (
-                      <li
-                        key={project.id}
-                        className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]"
-                      >
+                    {projects.map((project) => {
+                      const progress = progressByProject.get(project.id);
+                      return (
+                        <li
+                          key={project.id}
+                          className="min-w-0 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]"
+                        >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <h3 className="break-words text-sm font-semibold text-slate-900">
                               {project.name}
                             </h3>
                             <p className="mt-1 text-xs text-slate-500">
-                              {tasksByProject.get(project.id) ?? 0}{" "}
-                              {(tasksByProject.get(project.id) ?? 0) === 1
+                              {progress?.total ?? 0}{" "}
+                              {progress?.total === 1
                                 ? "task"
                                 : "tasks"}
                             </p>
@@ -345,10 +349,7 @@ export function WorkspaceDashboard({
                             className="shrink-0 text-teal-700"
                           />
                         </div>
-                        {(() => {
-                          const progress = progressByProject.get(project.id);
-                          if (!progress) return null;
-                          return (
+                        {progress?.total ? (
                             <div className="mt-4">
                               <div className="mb-1.5 flex items-center justify-between text-xs text-slate-500">
                                 <span>
@@ -371,8 +372,11 @@ export function WorkspaceDashboard({
                                 />
                               </div>
                             </div>
-                          );
-                        })()}
+                        ) : (
+                          <p className="mt-4 text-xs text-slate-500">
+                            No tasks yet
+                          </p>
+                        )}
                         {project.description && (
                           <p className="mt-3 line-clamp-2 break-words text-sm leading-5 text-slate-500">
                             {project.description}
@@ -394,12 +398,14 @@ export function WorkspaceDashboard({
                           <DeleteRecordButton
                             id={project.id}
                             label="Delete"
+                            ariaLabel={`Delete project ${project.name}`}
                             confirmMessage={`Delete “${project.name}” and all of its tasks? This cannot be undone.`}
                             action={deleteProject}
                           />
                         </div>
-                      </li>
-                    ))}
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </section>

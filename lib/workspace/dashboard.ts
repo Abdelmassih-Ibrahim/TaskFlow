@@ -22,6 +22,7 @@ export type ProjectProgress = {
 };
 
 const priorityOrder = { high: 0, medium: 1, low: 2 } as const;
+const statusOrder = { todo: 0, in_progress: 1, done: 2 } as const;
 
 export function getWorkspaceSummary(
   tasks: TaskWithProject[],
@@ -103,7 +104,7 @@ export function filterAndSortTasks(
       return priorityOrder[left.priority] - priorityOrder[right.priority];
     }
     if (filters.sort === "status") {
-      return left.status.localeCompare(right.status);
+      return statusOrder[left.status] - statusOrder[right.status];
     }
     return (
       (left.due_date ?? "9999-12-31").localeCompare(

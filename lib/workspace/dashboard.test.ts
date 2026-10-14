@@ -123,6 +123,18 @@ describe("workspace task filtering and sorting", () => {
       }).map((task) => task.id),
     ).toEqual(["task-a"]);
   });
+
+  it("sorts statuses in workflow order", () => {
+    expect(
+      filterAndSortTasks(tasks, {
+        search: "",
+        status: "all",
+        priority: "all",
+        projectId: "",
+        sort: "status",
+      }).map((task) => task.status),
+    ).toEqual(["todo", "in_progress", "done"]);
+  });
 });
 
 describe("project progress", () => {

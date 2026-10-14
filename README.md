@@ -4,6 +4,26 @@ TaskFlow is a project and task management app built with Next.js, Supabase Auth,
 
 > **Database setup required:** Project and task data is read from and written to the configured Supabase database. Apply the included migration to your local or hosted database before using these features. Live database behavior has not been verified against a hosted project in this repository.
 
+## Screenshots
+
+> Screenshot placeholder: add genuine desktop and mobile screenshots after setting up a local Supabase project. No screenshots are included yet.
+
+## Features
+
+- Email registration, sign-in, sign-out, and protected dashboard routes.
+- Create, edit, and delete projects and tasks with server-side validation.
+- Search tasks and filter by project, status, or priority; sort by due date, title, status, or priority.
+- Task summaries for total, completed, and overdue work, plus per-project completion progress.
+- Responsive sidebar/mobile navigation, accessible forms and dialogs, loading and empty states, and mutation feedback.
+
+## Architecture
+
+- `app/` contains App Router pages, route loading UI, and server actions.
+- `components/` contains the responsive dashboard, navigation, and forms.
+- `lib/workspace/` contains database-backed workspace reads, validation, types, and dashboard calculations.
+- `lib/supabase/` contains the typed server client; requests use the signed-in user's session.
+- `supabase/migrations/` and `supabase/tests/` contain the schema, RLS policies, and local pgTAP checks.
+
 ## Prerequisites
 
 - A currently supported Node.js LTS release. Next.js 16 requires Node.js 20.9 or later; Node.js 26.7.0 was used for this milestone.
@@ -54,6 +74,8 @@ npm.cmd run db:stop    # Stop the local Supabase stack
 
 The Supabase CLI is pinned as a project development dependency and is available after `npm.cmd install`. Start Docker Desktop before running database commands. The first `db:start` downloads local service images.
 
+The Vitest suite uses React Testing Library and jsdom for credential-free UI tests, and mocks Supabase for server-action/data-access tests. It does not establish live database connectivity or RLS enforcement. There are no Playwright end-to-end tests yet: authentic CRUD E2E tests require a separately configured local Supabase stack and isolated test users/data.
+
 ## Authentication setup
 
 The public routes are `/login` and `/register`. Registration validates email and password, checks the repeated password, and uses Supabase Auth. If email confirmation is enabled, the confirmation link returns through `/auth/callback`; after sign-in, the dashboard is available at `/`.
@@ -102,11 +124,12 @@ The application uses `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHAB
 - Projects and tasks are loaded using the authenticated Supabase server client; RLS remains the database authorization boundary.
 - Create, edit, and delete projects and tasks, with server-side validation, safe feedback, and confirmation before deletion.
 - Task titles, descriptions, status, priority, due date, and project association.
-- Search, status/project filters, and sorting for the current task list.
+- Search, status/priority/project filters, and sorting for the current task list.
+- Project progress indicators calculated from completed and total tasks.
 - Overview cards for total, completed, and overdue tasks, calculated from saved tasks.
 - Loading, empty, database error, and mutation-pending states; responsive project cards and task table/mobile cards.
 - Supabase Auth email registration, sign-in, sign-out, confirmation callback, and protected dashboard route.
-- Credential-free unit tests for validation, task summaries/filtering, Supabase data mapping, and authorization-sensitive server actions.
+- Credential-free unit and component tests for auth forms, workspace forms/states, validation, task summaries/filtering, Supabase data mapping, and authorization-sensitive server actions.
 - Calendar, reports, settings, and help navigation are visibly unavailable placeholders.
 
 ## Not implemented yet
@@ -115,7 +138,7 @@ The application uses `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHAB
 - Working calendar, reports, settings, or team collaboration.
 - Automated browser end-to-end tests, CI, and deployment configuration.
 
-The schema and RLS rules are defined and covered by local pgTAP tests. The application unit tests mock Supabase and do not prove live database authorization or connectivity. Configure a Supabase project and apply the migration before relying on persisted data. Live authentication and database operations remain unverified until tested against a configured project. No remote database migrations or deployment have been performed.
+The schema and RLS rules are defined and covered by local pgTAP tests. The application tests mock Supabase and do not prove live database authorization or connectivity. Configure a Supabase project and apply the migration before relying on persisted data. Live authentication and database operations remain unverified until tested against a configured project. No remote database migrations or deployment have been performed.
 
 ## Technology
 

@@ -21,6 +21,7 @@ import {
 type DialogProps = {
   title: string;
   description: string;
+  busy: boolean;
   onClose: (successMessage?: string) => void;
   children: React.ReactNode;
 };
@@ -28,6 +29,7 @@ type DialogProps = {
 function WorkspaceDialog({
   title,
   description,
+  busy,
   onClose,
   children,
 }: DialogProps) {
@@ -50,10 +52,10 @@ function WorkspaceDialog({
       aria-describedby="workspace-dialog-description"
       onCancel={(event) => {
         event.preventDefault();
-        onClose();
+        if (!busy) onClose();
       }}
       onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (!busy && event.target === event.currentTarget) onClose();
       }}
       className="m-auto w-[min(560px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/50"
     >
@@ -128,6 +130,7 @@ function DialogActions({
       <button
         type="button"
         onClick={onClose}
+        disabled={pending}
         className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
       >
         Cancel
@@ -166,6 +169,7 @@ export function ProjectDialog({
     <WorkspaceDialog
       title={project ? "Edit project" : "Create a project"}
       description="Projects keep related tasks organized in one place."
+      busy={pending}
       onClose={onClose}
     >
       <form action={formAction} aria-busy={pending}>
@@ -246,6 +250,7 @@ export function TaskDialog({
     <WorkspaceDialog
       title={task ? "Edit task" : "Create a task"}
       description="Add the details and choose the project this task belongs to."
+      busy={pending}
       onClose={onClose}
     >
       <form action={formAction} aria-busy={pending}>
@@ -389,11 +394,13 @@ type DeleteAction = (
 export function DeleteRecordButton({
   id,
   label,
+  ariaLabel,
   confirmMessage,
   action,
 }: {
   id: string;
   label: string;
+  ariaLabel: string;
   confirmMessage: string;
   action: DeleteAction;
 }) {
@@ -414,6 +421,7 @@ export function DeleteRecordButton({
       <button
         type="submit"
         disabled={pending}
+        aria-label={ariaLabel}
         className="rounded-md px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50"
       >
         {pending ? "Deleting..." : label}
