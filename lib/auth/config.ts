@@ -1,16 +1,17 @@
 import { z } from "zod";
-import { getSupabaseConfig } from "@/lib/supabase/shared";
+import { getSupabaseConfig } from "../supabase/shared";
 
 export function getAuthSiteUrl(): string | null {
   const parsed = z.string().url().safeParse(process.env.NEXT_PUBLIC_SITE_URL);
   if (!parsed.success) return null;
 
   const siteUrl = new URL(parsed.data);
-  if (
-    siteUrl.protocol !== "https:" &&
-    siteUrl.hostname !== "localhost" &&
-    siteUrl.hostname !== "127.0.0.1"
-  ) {
+  const isSecure = siteUrl.protocol === "https:";
+  const isLocalHttp =
+    siteUrl.protocol === "http:" &&
+    (siteUrl.hostname === "localhost" || siteUrl.hostname === "127.0.0.1");
+
+  if (!isSecure && !isLocalHttp) {
     return null;
   }
 

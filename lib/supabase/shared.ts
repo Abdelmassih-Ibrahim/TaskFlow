@@ -15,11 +15,13 @@ export function getSupabaseConfig(): SupabaseConfig | null {
   if (!parsedUrl.success) return null;
 
   const supabaseUrl = new URL(parsedUrl.data);
-  if (
-    supabaseUrl.protocol !== "https:" &&
-    supabaseUrl.hostname !== "localhost" &&
-    supabaseUrl.hostname !== "127.0.0.1"
-  ) {
+  const isSecure = supabaseUrl.protocol === "https:";
+  const isLocalHttp =
+    supabaseUrl.protocol === "http:" &&
+    (supabaseUrl.hostname === "localhost" ||
+      supabaseUrl.hostname === "127.0.0.1");
+
+  if (!isSecure && !isLocalHttp) {
     return null;
   }
 

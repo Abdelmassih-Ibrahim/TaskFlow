@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getAuthSetupMessage, getAuthSiteUrl } from "./config";
-import { getSupabaseConfig } from "@/lib/supabase/shared";
+import { getSupabaseConfig } from "../supabase/shared";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -34,6 +34,17 @@ describe("Supabase auth configuration", () => {
     expect(getAuthSetupMessage()).toContain("Supabase project URL");
 
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
+    expect(getAuthSetupMessage({ registration: true })).toContain(
+      "NEXT_PUBLIC_SITE_URL",
+    );
+  });
+
+  it("does not accept insecure non-HTTP site URLs, even on localhost", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "publishable-placeholder");
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "ftp://localhost:3000");
+
+    expect(getAuthSiteUrl()).toBeNull();
     expect(getAuthSetupMessage({ registration: true })).toContain(
       "NEXT_PUBLIC_SITE_URL",
     );
