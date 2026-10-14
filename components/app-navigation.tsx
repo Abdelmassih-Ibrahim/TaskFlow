@@ -4,7 +4,6 @@ import {
   BarChart3,
   CalendarDays,
   CheckSquare2,
-  ChevronDown,
   CircleHelp,
   Command,
   FolderKanban,
@@ -22,10 +21,10 @@ import { signOut } from "@/app/actions/auth";
 const primaryNavigation = [
   { label: "Dashboard", href: "#dashboard", icon: LayoutDashboard, active: true },
   { label: "My tasks", href: "#task-overview", icon: CheckSquare2, active: false },
+  { label: "Projects", href: "#projects", icon: FolderKanban, active: false },
 ];
 
-const demoNavigation = [
-  { label: "Projects", icon: FolderKanban },
+const unavailableNavigation = [
   { label: "Calendar", icon: CalendarDays },
   { label: "Reports", icon: BarChart3 },
 ];
@@ -49,19 +48,18 @@ function SidebarContent({
       </div>
 
       <div className="mx-4 mb-6 rounded-xl border border-white/10 bg-white/[0.06] p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-indigo-400/20 text-xs font-semibold text-indigo-200">
-              A
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-slate-100">
-                Atlas Studio
-              </p>
-              <p className="mt-0.5 text-[11px] text-slate-400">Demo workspace</p>
-            </div>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-indigo-400/20 text-xs font-semibold text-indigo-200">
+            {email.charAt(0).toUpperCase()}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold text-slate-100">
+              {email}
+            </p>
+            <p className="mt-0.5 text-[11px] text-slate-400">
+              Personal workspace
+            </p>
           </div>
-          <ChevronDown size={15} aria-hidden="true" className="shrink-0 text-slate-500" />
         </div>
       </div>
 
@@ -88,11 +86,6 @@ function SidebarContent({
                   className={active ? "text-teal-300" : "text-slate-500"}
                 />
                 {label}
-                {label === "My tasks" && (
-                  <span className="ml-auto rounded-md bg-white/[0.08] px-1.5 py-0.5 text-[10px] text-slate-400">
-                    10
-                  </span>
-                )}
               </Link>
             </li>
           ))}
@@ -102,11 +95,11 @@ function SidebarContent({
           Organize
         </p>
         <ul className="space-y-1">
-          {demoNavigation.map(({ label, icon: Icon }) => (
+          {unavailableNavigation.map(({ label, icon: Icon }) => (
             <li key={label}>
               <span
                 aria-disabled="true"
-                title={`${label} is not available in this demo`}
+                title={`${label} is not available yet`}
                 className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-slate-500"
               >
                 <Icon size={17} aria-hidden="true" className="text-slate-600" />
@@ -118,32 +111,6 @@ function SidebarContent({
             </li>
           ))}
         </ul>
-
-        <div className="mt-8 border-t border-white/[0.08] pt-5">
-          <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-            Your projects
-          </p>
-          <div className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-slate-400">
-            <span className="size-2 rounded-full bg-blue-400" />
-            Website redesign
-            <span className="ml-auto text-[10px] text-slate-600">3</span>
-          </div>
-          <div className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-slate-400">
-            <span className="size-2 rounded-full bg-violet-400" />
-            Mobile app
-            <span className="ml-auto text-[10px] text-slate-600">4</span>
-          </div>
-          <div className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-slate-400">
-            <span className="size-2 rounded-full bg-amber-400" />
-            Brand refresh
-            <span className="ml-auto text-[10px] text-slate-600">2</span>
-          </div>
-          <div className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-slate-400">
-            <span className="size-2 rounded-full bg-teal-400" />
-            Customer experience
-            <span className="ml-auto text-[10px] text-slate-600">1</span>
-          </div>
-        </div>
       </nav>
 
       <div className="space-y-1 border-t border-white/[0.08] px-3 py-4">
@@ -157,7 +124,7 @@ function SidebarContent({
         </span>
         <span
           aria-disabled="true"
-          title="Help is not available in this demo"
+          title="Help is not available yet"
           className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-slate-500"
         >
           <CircleHelp size={16} aria-hidden="true" className="text-slate-600" />

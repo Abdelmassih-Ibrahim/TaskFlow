@@ -1,8 +1,8 @@
 # TaskFlow
 
-TaskFlow is a project and task management app in progress. Email registration and sign-in use Supabase Auth, while the dashboard itself remains a sample-data preview. The repository also defines a versioned Supabase schema and database-level access policies for future project and task features.
+TaskFlow is a project and task management app built with Next.js, Supabase Auth, and Supabase PostgreSQL. Signed-in users can manage their own projects and tasks through a responsive dashboard.
 
-> **Dashboard demo only:** The dashboard's sample tasks and projects are illustrative and are not saved. The Next.js app uses Supabase Auth for accounts and sessions, but does not yet read or write project/task data. Project/task editing has not been implemented.
+> **Database setup required:** Project and task data is read from and written to the configured Supabase database. Apply the included migration to your local or hosted database before using these features. Live database behavior has not been verified against a hosted project in this repository.
 
 ## Prerequisites
 
@@ -84,7 +84,7 @@ npm.cmd run db:lint
 npm.cmd run db:test
 ```
 
-The pgTAP tests use synthetic users and verify allowed owner operations, denied cross-user access and reassignment, anonymous-role grants, schema constraints, timestamps, and deletion behavior. They run only against the local Supabase stack; passing them is evidence for the tested database policies, not a claim that the application is production-secure.
+The pgTAP tests use synthetic users and verify allowed owner operations, denied cross-user access and reassignment, anonymous-role grants, schema constraints, timestamps, and deletion behavior. Run `db:reset` after starting the local stack to apply the migration before starting the app. These tests run only against the local Supabase stack; passing them is evidence for the tested database policies, not a claim that the application is production-secure.
 
 Stop the local services with:
 
@@ -99,24 +99,23 @@ The application uses `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHAB
 ## Current functionality
 
 - Responsive TaskFlow dashboard shell with desktop sidebar and mobile navigation.
-- Overview cards for total, completed, and overdue tasks.
-- Task table showing sample projects, due dates, priorities, statuses, and demo assignees.
-- Clear demo-data notices; navigation for features not yet available is visibly disabled.
+- Projects and tasks are loaded using the authenticated Supabase server client; RLS remains the database authorization boundary.
+- Create, edit, and delete projects and tasks, with server-side validation, safe feedback, and confirmation before deletion.
+- Task titles, descriptions, status, priority, due date, and project association.
+- Search, status/project filters, and sorting for the current task list.
+- Overview cards for total, completed, and overdue tasks, calculated from saved tasks.
+- Loading, empty, database error, and mutation-pending states; responsive project cards and task table/mobile cards.
 - Supabase Auth email registration, sign-in, sign-out, confirmation callback, and protected dashboard route.
-- Unit tests for summary counts and due-date labels.
-- Credential-free unit tests for authentication input validation and safe error messages.
-
-The sample profile, projects, people, and tasks are invented example content for the interface preview. They do not represent real accounts or saved work.
+- Credential-free unit tests for validation, task summaries/filtering, Supabase data mapping, and authorization-sensitive server actions.
+- Calendar, reports, settings, and help navigation are visibly unavailable placeholders.
 
 ## Not implemented yet
 
 - Password reset, OAuth, multi-factor authentication, and account management.
-- Next.js reads/writes against Supabase and persisted dashboard data.
-- Creating, editing, deleting, searching, or filtering projects and tasks.
 - Working calendar, reports, settings, or team collaboration.
-- End-to-end tests, CI, or deployment configuration.
+- Automated browser end-to-end tests, CI, and deployment configuration.
 
-The schema and RLS rules are defined and covered by local pgTAP tests, but have not been applied to a hosted project or connected to project/task data in the application. Live authentication remains unverified until configured against a Supabase project. No remote database migrations or deployment have been performed.
+The schema and RLS rules are defined and covered by local pgTAP tests. The application unit tests mock Supabase and do not prove live database authorization or connectivity. Configure a Supabase project and apply the migration before relying on persisted data. Live authentication and database operations remain unverified until tested against a configured project. No remote database migrations or deployment have been performed.
 
 ## Technology
 
