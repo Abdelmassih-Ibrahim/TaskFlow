@@ -13,7 +13,12 @@ import { getDemoTasks, getTaskSummary } from "@/lib/demo-tasks";
 
 export const dynamic = "force-dynamic";
 
-export default function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const today = new Date();
   const tasks = getDemoTasks(today);
   const summary = getTaskSummary(tasks, today);
@@ -33,6 +38,14 @@ export default function DashboardPage() {
   return (
     <main id="dashboard" className="min-w-0 flex-1 px-5 pb-12 pt-7 sm:px-8 lg:ml-[248px] lg:px-10 lg:pt-10">
       <div className="mx-auto max-w-[1320px]">
+        {error === "sign-out" && (
+          <p
+            role="alert"
+            className="mb-5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"
+          >
+            We couldn&apos;t sign you out. Please try again.
+          </p>
+        )}
         <div className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
             <p className="mb-2 text-sm font-medium text-slate-500">

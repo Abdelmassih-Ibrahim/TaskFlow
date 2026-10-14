@@ -9,6 +9,7 @@ import {
   Command,
   FolderKanban,
   LayoutDashboard,
+  LogOut,
   Menu,
   Settings2,
   Sparkles,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { signOut } from "@/app/actions/auth";
 
 const primaryNavigation = [
   { label: "Dashboard", href: "#dashboard", icon: LayoutDashboard, active: true },
@@ -28,7 +30,13 @@ const demoNavigation = [
   { label: "Reports", icon: BarChart3 },
 ];
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarContent({
+  email,
+  onNavigate,
+}: {
+  email: string;
+  onNavigate?: () => void;
+}) {
   return (
     <>
       <div className="flex h-[76px] items-center gap-3 px-6">
@@ -157,19 +165,29 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         </span>
         <div className="mt-3 flex items-center gap-3 border-t border-white/[0.08] px-3 pt-4">
           <span className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-200 to-orange-300 text-[11px] font-bold text-orange-950">
-            AL
+            {email.charAt(0).toUpperCase()}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-xs font-medium text-slate-200">Alex Morgan</p>
-            <p className="truncate text-[10px] text-slate-500">Sample profile</p>
+            <p className="truncate text-xs font-medium text-slate-200">{email}</p>
+            <p className="truncate text-[10px] text-slate-500">Signed in</p>
           </div>
         </div>
+        <form action={signOut} className="mt-2">
+          <button
+            type="submit"
+            onClick={onNavigate}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
+          >
+            <LogOut size={16} aria-hidden="true" className="text-slate-500" />
+            Sign out
+          </button>
+        </form>
       </div>
     </>
   );
 }
 
-export function AppNavigation() {
+export function AppNavigation({ email }: { email: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileNavigationRef = useRef<HTMLElement>(null);
@@ -218,7 +236,7 @@ export function AppNavigation() {
   return (
     <>
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col bg-[#111827] lg:flex">
-        <SidebarContent />
+        <SidebarContent email={email} />
         <div className="mx-4 mb-4 flex items-center gap-2 rounded-lg bg-teal-400/[0.08] px-3 py-2.5 text-[11px] text-teal-100/80">
           <Sparkles size={14} aria-hidden="true" className="text-teal-300" />
           A calm space for focused work
@@ -275,7 +293,7 @@ export function AppNavigation() {
                 <X size={19} aria-hidden="true" />
               </button>
             </div>
-            <SidebarContent onNavigate={closeMobileNavigation} />
+            <SidebarContent email={email} onNavigate={closeMobileNavigation} />
             <div className="mx-4 mb-4 flex items-center gap-2 rounded-lg bg-teal-400/[0.08] px-3 py-2.5 text-[11px] text-teal-100/80">
               <Sparkles size={14} aria-hidden="true" className="text-teal-300" />
               A calm space for focused work
