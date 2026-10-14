@@ -67,7 +67,7 @@ For a hosted Supabase project:
 3. Add the exact callback URL, such as `http://localhost:3000/auth/callback`, under **Authentication → URL Configuration → Redirect URLs**. Add the deployed app's callback URL when deploying.
 4. Copy `.env.example` to `.env.local` and fill in the project URL, publishable key, and app site URL. Do not use a service-role/secret key.
 
-The login and registration forms submit through server actions. Supabase Auth sessions are stored in cookies using `@supabase/ssr`; the Next.js 16 `proxy.ts` refreshes and verifies token claims, while the protected route-group layout independently calls Supabase `getUser()` before rendering the dashboard. Missing configuration or invalid sessions cannot expose the protected page. The database RLS policies remain the authorization boundary for future project/task data; authentication alone does not grant access to records.
+The login and registration forms submit through server actions. Supabase Auth sessions are stored in cookies using `@supabase/ssr`; the Next.js 16 `proxy.ts` refreshes and verifies token claims, while the protected route-group layout independently calls Supabase `getUser()` before rendering the dashboard. Missing configuration or invalid sessions cannot expose the protected page. The database RLS policies are the authorization boundary for project and task data; authentication alone does not grant access to records.
 
 Authentication requires a configured Supabase Auth service to work end-to-end. Unit tests cover local validation and safe error messages without credentials; they do not prove live sign-in, registration, email delivery, session refresh, or hosted-project RLS behavior.
 

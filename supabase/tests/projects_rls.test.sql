@@ -1,12 +1,25 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(23);
+select extensions.plan(25);
 
 insert into auth.users (id, email)
 values
   ('11111111-1111-4111-8111-111111111111', 'projects-owner@example.test'),
   ('22222222-2222-4222-8222-222222222222', 'projects-other@example.test');
+
+insert into public.projects (id, owner_id, name)
+values (
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+  '11111111-1111-4111-8111-111111111111',
+  'Owner project'
+);
+insert into public.tasks (id, project_id, title)
+values (
+  'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+  'Owner task'
+);
 
 select extensions.policies_are(
   'public',
@@ -64,12 +77,12 @@ set local request.jwt.claim.sub = '11111111-1111-4111-8111-111111111111';
 select extensions.results_eq(
   $$insert into public.projects (id, owner_id, name)
     values (
-      'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      '99999999-9999-4999-8999-999999999999',
       '11111111-1111-4111-8111-111111111111',
-      'Owner project'
+      'Created owner project'
     )
     returning name$$,
-  array['Owner project'],
+  array['Created owner project'],
   'an owner can create a project'
 );
 select extensions.results_eq(
@@ -173,11 +186,22 @@ select extensions.results_eq(
   'the denied delete left the owner project unchanged'
 );
 select extensions.results_eq(
+  $$select title from public.tasks
+    where id = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'$$,
+  array['Owner task'],
+  'another user cannot delete an owned project or cascade-delete its task'
+);
+select extensions.results_eq(
   $$delete from public.projects
     where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
     returning name$$,
   array['Updated owner project'],
   'the owner can delete their project'
+);
+select extensions.is_empty(
+  $$select id from public.tasks
+    where id = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'$$,
+  'deleting an owned project cascades to its tasks'
 );
 
 select * from extensions.finish();
