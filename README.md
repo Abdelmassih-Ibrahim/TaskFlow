@@ -5,6 +5,8 @@ TypeScript, Tailwind CSS och Supabase. Projektet visar ett sammanhängande
 arbetsflöde för att organisera projekt och uppgifter, med autentiseringssidor,
 filtrering, sammanfattningar och en responsiv dashboard.
 
+> **Språk:** Användargränssnittet är på svenska.
+
 > **Status:** Funktionerna är implementerade i koden och verifierade med
 > automatiska kontroller där det anges nedan. Supabase Auth,
 > databasoperationer och Row Level Security (RLS) har inte verifierats mot en
@@ -41,8 +43,8 @@ För att senare ta representativa bilder utan att använda riktiga användardata
 3. Starta appen med `npm.cmd run dev`, logga in med testkontot och skapa
    syntetiska projekt och uppgifter genom gränssnittet.
 4. Ta en desktopbild av dashboarden, där översikt, projekt och uppgifter visas
-   på samma sida. Använd navigeringens Dashboard-, Projects- och My tasks-länkar
-   för att visa respektive sektion inför bilden.
+   på samma sida. Använd navigeringslänkarna Översikt, Projekt och Mina
+   uppgifter för att visa respektive sektion inför bilden.
 5. Öppna webbläsarens responsiva enhetsvy, kontrollera att mobilnavigering och
    uppgiftskort fungerar, och ta en separat mobilbild.
 6. Granska bilderna för e-postadresser, personuppgifter, tokens och annan

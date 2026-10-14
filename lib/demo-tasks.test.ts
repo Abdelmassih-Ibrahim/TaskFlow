@@ -33,4 +33,8 @@ describe("demo task due dates", () => {
     expect(formatDueDate("2026-10-14", today)).toBe("Idag");
     expect(formatDueDate("2026-10-15", today)).toBe("Imorgon");
   });
+
+  it("formats other due dates using the Swedish locale", () => {
+    expect(formatDueDate("2026-10-20", today)).toMatch(/20 okt/);
+  });
 });

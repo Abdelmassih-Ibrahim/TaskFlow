@@ -81,7 +81,7 @@ describe("workspace data access", () => {
     await expect(getWorkspaceData()).resolves.toMatchObject({
       projects: [],
       tasks: [],
-      error: expect.stringContaining("Supabase configuration"),
+      error: expect.stringContaining("Supabase-konfigurationen"),
     });
   });
 });

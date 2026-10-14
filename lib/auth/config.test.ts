@@ -11,7 +11,7 @@ describe("Supabase auth configuration", () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "");
 
-    expect(getAuthSetupMessage()).toContain("Supabase project URL");
+    expect(getAuthSetupMessage()).toContain("Supabase-projektets URL");
     expect(getSupabaseConfig()).toBeNull();
   });
 
@@ -44,7 +44,7 @@ describe("Supabase auth configuration", () => {
 
     expect(getAuthSiteUrl()).toBeNull();
     expect(getAuthSetupMessage({ registration: true })).toContain(
-      "Vercel system environment variables",
+      "Vercels systemvariabler",
     );
   });
 
@@ -54,7 +54,7 @@ describe("Supabase auth configuration", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "");
 
     expect(getSupabaseConfig()).toBeNull();
-    expect(getAuthSetupMessage()).toContain("Supabase project URL");
+    expect(getAuthSetupMessage()).toContain("Supabase-projektets URL");
 
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
     expect(getAuthSetupMessage({ registration: true })).toContain(

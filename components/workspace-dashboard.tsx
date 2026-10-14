@@ -493,9 +493,9 @@ export function WorkspaceDashboard({
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
                     >
                       <option value="all">Alla prioriteter</option>
-                      <option value="high">Hög prioritet</option>
-                      <option value="medium">Medelhög prioritet</option>
-                      <option value="low">Låg prioritet</option>
+                      <option value="high">Hög</option>
+                      <option value="medium">Medel</option>
+                      <option value="low">Låg</option>
                     </select>
                   </label>
                   <label>
