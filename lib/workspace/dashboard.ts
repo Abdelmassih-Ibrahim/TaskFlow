@@ -1,9 +1,10 @@
 import { formatDueDate } from "../date-utils";
-import type { TaskStatus, TaskWithProject } from "./types";
+import type { TaskPriority, TaskStatus, TaskWithProject } from "./types";
 
 export type TaskFilters = {
   search: string;
   status: TaskStatus | "all";
+  priority: TaskPriority | "all";
   projectId: string;
   sort: "due_date" | "title" | "priority" | "status";
 };
@@ -12,6 +13,12 @@ export type WorkspaceSummary = {
   total: number;
   completed: number;
   overdue: number;
+};
+
+export type ProjectProgress = {
+  total: number;
+  completed: number;
+  percentage: number;
 };
 
 const priorityOrder = { high: 0, medium: 1, low: 2 } as const;
@@ -35,6 +42,23 @@ export function getWorkspaceSummary(
         task.due_date !== null &&
         task.due_date < todayKey,
     ).length,
+  };
+}
+
+export function getProjectProgress(
+  tasks: TaskWithProject[],
+  projectId: string,
+): ProjectProgress {
+  const projectTasks = tasks.filter((task) => task.project_id === projectId);
+  const completed = projectTasks.filter((task) => task.status === "done").length;
+
+  return {
+    total: projectTasks.length,
+    completed,
+    percentage:
+      projectTasks.length === 0
+        ? 0
+        : Math.round((completed / projectTasks.length) * 100),
   };
 }
 
@@ -66,6 +90,7 @@ export function filterAndSortTasks(
     return (
       matchesSearch &&
       (filters.status === "all" || task.status === filters.status) &&
+      (filters.priority === "all" || task.priority === filters.priority) &&
       (!filters.projectId || task.project_id === filters.projectId)
     );
   });

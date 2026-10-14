@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  CalendarDays,
   Check,
   FolderKanban,
   ListTodo,
@@ -11,21 +10,23 @@ import {
   Clock3,
   X,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { deleteProject } from "@/app/actions/workspace";
 import { SummaryCard } from "@/components/summary-card";
 import { TaskTable } from "@/components/task-table";
 import {
   filterAndSortTasks,
+  getProjectProgress,
   getWorkspaceSummary,
 } from "@/lib/workspace/dashboard";
 import type {
   Project,
+  TaskPriority,
   TaskStatus,
   TaskWithProject,
   WorkspaceData,
 } from "@/lib/workspace/types";
-import { taskStatuses } from "@/lib/workspace/types";
+import { taskPriorities, taskStatuses } from "@/lib/workspace/types";
 import {
   DeleteRecordButton,
   ProjectDialog,
@@ -48,13 +49,28 @@ export function WorkspaceDashboard({
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<TaskStatus | "all">("all");
+  const [priority, setPriority] = useState<TaskPriority | "all">("all");
   const [projectId, setProjectId] = useState("");
   const [sort, setSort] = useState<TaskSort>("due_date");
   const [notice, setNotice] = useState<string | null>(null);
+  const dialogTriggerRef = useRef<HTMLElement | null>(null);
+  const openDialog = useCallback(
+    (dialog: Exclude<ActiveDialog, null>, trigger: HTMLElement) => {
+      dialogTriggerRef.current = trigger;
+      setActiveDialog(dialog);
+    },
+    [],
+  );
   const closeDialog = useCallback((successMessage?: string) => {
     setActiveDialog(null);
     if (successMessage) setNotice(successMessage);
   }, []);
+
+  useEffect(() => {
+    if (activeDialog) return;
+    dialogTriggerRef.current?.focus();
+    dialogTriggerRef.current = null;
+  }, [activeDialog]);
 
   const summary = useMemo(() => getWorkspaceSummary(tasks), [tasks]);
   const filteredTasks = useMemo(
@@ -62,10 +78,11 @@ export function WorkspaceDashboard({
       filterAndSortTasks(tasks, {
         search,
         status,
+        priority,
         projectId,
         sort,
       }),
-    [projectId, search, sort, status, tasks],
+    [priority, projectId, search, sort, status, tasks],
   );
   const tasksByProject = useMemo(() => {
     const counts = new Map<string, number>();
@@ -74,7 +91,19 @@ export function WorkspaceDashboard({
     }
     return counts;
   }, [tasks]);
-  const hasFilters = Boolean(search || projectId || status !== "all");
+  const progressByProject = useMemo(
+    () =>
+      new Map(
+        projects.map((project) => [
+          project.id,
+          getProjectProgress(tasks, project.id),
+        ]),
+      ),
+    [projects, tasks],
+  );
+  const hasFilters = Boolean(
+    search || projectId || status !== "all" || priority !== "all",
+  );
 
   const today = new Date();
   const greeting =
@@ -149,17 +178,14 @@ export function WorkspaceDashboard({
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-600 shadow-sm">
-                    <CalendarDays
-                      size={16}
-                      aria-hidden="true"
-                      className="text-slate-400"
-                    />
-                    This week
-                  </span>
                   <button
                     type="button"
-                    onClick={() => setActiveDialog({ type: "project", project: null })}
+                    onClick={(event) =>
+                      openDialog(
+                        { type: "project", project: null },
+                        event.currentTarget,
+                      )
+                    }
                     className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
                   >
                     <FolderKanban size={16} aria-hidden="true" />
@@ -167,7 +193,12 @@ export function WorkspaceDashboard({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setActiveDialog({ type: "task", task: null })}
+                    onClick={(event) =>
+                      openDialog(
+                        { type: "task", task: null },
+                        event.currentTarget,
+                      )
+                    }
                     disabled={projects.length === 0}
                     title={
                       projects.length === 0
@@ -251,7 +282,12 @@ export function WorkspaceDashboard({
                   </div>
                   <button
                     type="button"
-                    onClick={() => setActiveDialog({ type: "project", project: null })}
+                    onClick={(event) =>
+                      openDialog(
+                        { type: "project", project: null },
+                        event.currentTarget,
+                      )
+                    }
                     className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50"
                   >
                     <Plus size={16} aria-hidden="true" />
@@ -273,8 +309,11 @@ export function WorkspaceDashboard({
                     </p>
                     <button
                       type="button"
-                      onClick={() =>
-                        setActiveDialog({ type: "project", project: null })
+                      onClick={(event) =>
+                        openDialog(
+                          { type: "project", project: null },
+                          event.currentTarget,
+                        )
                       }
                       className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
                     >
@@ -306,6 +345,34 @@ export function WorkspaceDashboard({
                             className="shrink-0 text-teal-700"
                           />
                         </div>
+                        {(() => {
+                          const progress = progressByProject.get(project.id);
+                          if (!progress) return null;
+                          return (
+                            <div className="mt-4">
+                              <div className="mb-1.5 flex items-center justify-between text-xs text-slate-500">
+                                <span>
+                                  {progress.completed} of {progress.total}{" "}
+                                  complete
+                                </span>
+                                <span>{progress.percentage}%</span>
+                              </div>
+                              <div
+                                role="progressbar"
+                                aria-label={`${project.name} progress`}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-valuenow={progress.percentage}
+                                className="h-1.5 overflow-hidden rounded-full bg-slate-100"
+                              >
+                                <div
+                                  className="h-full rounded-full bg-teal-600 transition-[width] motion-reduce:transition-none"
+                                  style={{ width: `${progress.percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })()}
                         {project.description && (
                           <p className="mt-3 line-clamp-2 break-words text-sm leading-5 text-slate-500">
                             {project.description}
@@ -314,8 +381,11 @@ export function WorkspaceDashboard({
                         <div className="mt-3 flex flex-wrap items-center gap-1 border-t border-slate-100 pt-2">
                           <button
                             type="button"
-                            onClick={() =>
-                              setActiveDialog({ type: "project", project })
+                            onClick={(event) =>
+                              openDialog(
+                                { type: "project", project },
+                                event.currentTarget,
+                              )
                             }
                             className="rounded-md px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                           >
@@ -352,7 +422,12 @@ export function WorkspaceDashboard({
                   </div>
                   <button
                     type="button"
-                    onClick={() => setActiveDialog({ type: "task", task: null })}
+                    onClick={(event) =>
+                      openDialog(
+                        { type: "task", task: null },
+                        event.currentTarget,
+                      )
+                    }
                     disabled={projects.length === 0}
                     className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
@@ -361,7 +436,7 @@ export function WorkspaceDashboard({
                   </button>
                 </div>
 
-                <div className="mb-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_180px_190px_170px_auto]">
+                <div className="mb-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_150px_150px_180px_150px_auto]">
                   <label className="relative block">
                     <span className="sr-only">Search tasks</span>
                     <Search
@@ -376,6 +451,30 @@ export function WorkspaceDashboard({
                       placeholder="Search tasks or projects"
                       className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
                     />
+                  </label>
+                  <label>
+                    <span className="sr-only">Filter by priority</span>
+                    <select
+                      aria-label="Filter by priority"
+                      value={priority}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        if (value === "all") {
+                          setPriority("all");
+                          return;
+                        }
+                        const selectedPriority = taskPriorities.find(
+                          (taskPriority) => taskPriority === value,
+                        );
+                        if (selectedPriority) setPriority(selectedPriority);
+                      }}
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                    >
+                      <option value="all">All priorities</option>
+                      <option value="high">High priority</option>
+                      <option value="medium">Medium priority</option>
+                      <option value="low">Low priority</option>
+                    </select>
                   </label>
                   <label>
                     <span className="sr-only">Filter by status</span>
@@ -439,6 +538,7 @@ export function WorkspaceDashboard({
                       onClick={() => {
                         setSearch("");
                         setStatus("all");
+                        setPriority("all");
                         setProjectId("");
                       }}
                       className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
@@ -451,7 +551,12 @@ export function WorkspaceDashboard({
                   tasks={filteredTasks}
                   totalTasks={tasks.length}
                   onEditTask={(task) =>
-                    setActiveDialog({ type: "task", task })
+                    openDialog(
+                      { type: "task", task },
+                      document.activeElement instanceof HTMLElement
+                        ? document.activeElement
+                        : document.body,
+                    )
                   }
                 />
               </section>

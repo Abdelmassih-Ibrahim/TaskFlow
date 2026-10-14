@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   filterAndSortTasks,
+  getProjectProgress,
   getWorkspaceSummary,
   isWorkspaceTaskOverdue,
 } from "./dashboard";
@@ -74,6 +75,7 @@ describe("workspace task filtering and sorting", () => {
       filterAndSortTasks(tasks, {
         search: "check details",
         status: "all",
+        priority: "all",
         projectId: "",
         sort: "title",
       }).map((task) => task.id),
@@ -82,6 +84,7 @@ describe("workspace task filtering and sorting", () => {
       filterAndSortTasks(tasks, {
         search: "",
         status: "todo",
+        priority: "all",
         projectId: project.id,
         sort: "due_date",
       }),
@@ -93,6 +96,7 @@ describe("workspace task filtering and sorting", () => {
       filterAndSortTasks(tasks, {
         search: "",
         status: "all",
+        priority: "all",
         projectId: "",
         sort: "priority",
       }).map((task) => task.id),
@@ -101,9 +105,37 @@ describe("workspace task filtering and sorting", () => {
       filterAndSortTasks(tasks, {
         search: "",
         status: "all",
+        priority: "all",
         projectId: "",
         sort: "due_date",
       }).map((task) => task.id),
     ).toEqual(["task-b", "task-a", "task-c"]);
+  });
+
+  it("filters tasks by priority", () => {
+    expect(
+      filterAndSortTasks(tasks, {
+        search: "",
+        status: "all",
+        priority: "high",
+        projectId: "",
+        sort: "due_date",
+      }).map((task) => task.id),
+    ).toEqual(["task-a"]);
+  });
+});
+
+describe("project progress", () => {
+  it("calculates completed work as a percentage of project tasks", () => {
+    expect(getProjectProgress(tasks, project.id)).toEqual({
+      total: 2,
+      completed: 1,
+      percentage: 50,
+    });
+    expect(getProjectProgress([], project.id)).toEqual({
+      total: 0,
+      completed: 0,
+      percentage: 0,
+    });
   });
 });
