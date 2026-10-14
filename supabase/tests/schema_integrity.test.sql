@@ -31,7 +31,7 @@ select extensions.ok(
 
 select extensions.throws_ok(
   $$insert into public.projects (owner_id, name)
-    values ('33333333-3333-4333-8333-333333333333', '   ')$$,
+    values ('33333333-3333-4333-8333-333333333333', E' \t\n ')$$,
   '23514',
   null,
   'project names cannot be blank'
@@ -69,7 +69,7 @@ values (
 
 select extensions.throws_ok(
   $$insert into public.tasks (project_id, title)
-    values ('cccccccc-cccc-4ccc-8ccc-cccccccccccc', '   ')$$,
+    values ('cccccccc-cccc-4ccc-8ccc-cccccccccccc', E' \t\n ')$$,
   '23514',
   null,
   'task titles cannot be blank'

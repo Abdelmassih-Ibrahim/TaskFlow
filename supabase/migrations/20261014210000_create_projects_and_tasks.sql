@@ -6,7 +6,7 @@ create table public.projects (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint projects_name_length
-    check (char_length(btrim(name)) between 1 and 120),
+    check (name ~ '[^[:space:]]' and char_length(name) <= 120),
   constraint projects_description_length
     check (description is null or char_length(description) <= 2000)
 );
@@ -22,7 +22,7 @@ create table public.tasks (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint tasks_title_length
-    check (char_length(btrim(title)) between 1 and 200),
+    check (title ~ '[^[:space:]]' and char_length(title) <= 200),
   constraint tasks_description_length
     check (description is null or char_length(description) <= 5000),
   constraint tasks_status_allowed
