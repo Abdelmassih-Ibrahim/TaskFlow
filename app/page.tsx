@@ -11,6 +11,8 @@ import { SummaryCard } from "@/components/summary-card";
 import { TaskTable } from "@/components/task-table";
 import { getDemoTasks, getTaskSummary } from "@/lib/demo-tasks";
 
+export const dynamic = "force-dynamic";
+
 export default function DashboardPage() {
   const today = new Date();
   const tasks = getDemoTasks(today);
