@@ -4,7 +4,7 @@ import {
   getDemoTasks,
   getTaskSummary,
   isTaskOverdue,
-} from "@/lib/demo-tasks";
+} from "./demo-tasks";
 
 const today = new Date(2026, 9, 14);
 

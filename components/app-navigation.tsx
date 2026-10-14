@@ -10,7 +10,6 @@ import {
   FolderKanban,
   LayoutDashboard,
   Menu,
-  Plus,
   Settings2,
   Sparkles,
   X,

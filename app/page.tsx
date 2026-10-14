@@ -135,7 +135,6 @@ export default function DashboardPage() {
           </div>
           <span className="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500">
             Coming later
-            <ArrowUpRight size={13} aria-hidden="true" />
           </span>
         </section>
       </div>
