@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export type SupabaseConfig = {
   url: string;
   publishableKey: string;
@@ -9,5 +11,17 @@ export function getSupabaseConfig(): SupabaseConfig | null {
 
   if (!url || !publishableKey) return null;
 
-  return { url, publishableKey };
+  const parsedUrl = z.string().url().safeParse(url);
+  if (!parsedUrl.success) return null;
+
+  const supabaseUrl = new URL(parsedUrl.data);
+  if (
+    supabaseUrl.protocol !== "https:" &&
+    supabaseUrl.hostname !== "localhost" &&
+    supabaseUrl.hostname !== "127.0.0.1"
+  ) {
+    return null;
+  }
+
+  return { url: supabaseUrl.origin, publishableKey };
 }

@@ -1,4 +1,5 @@
 import { AuthForm } from "@/components/auth-form";
+import { getAuthSetupMessage } from "@/lib/auth/config";
 
 type RegisterPageProps = {
   searchParams: Promise<{ error?: string }>;
@@ -9,9 +10,16 @@ export default async function RegisterPage({
 }: RegisterPageProps) {
   const { error } = await searchParams;
   const notice =
-    error === "configuration"
+    getAuthSetupMessage({ registration: true }) ??
+    (error === "configuration"
       ? "Add your Supabase project URL and publishable key to .env.local before creating an account."
-      : undefined;
+      : undefined);
 
-  return <AuthForm mode="sign-up" notice={notice} />;
+  return (
+    <AuthForm
+      mode="sign-up"
+      notice={notice}
+      noticeIsError={Boolean(notice)}
+    />
+  );
 }

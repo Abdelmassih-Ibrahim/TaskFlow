@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getAuthSiteUrl, getAuthSetupMessage } from "@/lib/auth/config";
 import { getAuthErrorMessage } from "@/lib/auth/messages";
 import {
   signInSchema,
@@ -11,7 +12,6 @@ import type {
   AuthFieldErrors,
 } from "@/lib/auth/action-state";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { z } from "zod";
 
 function getFieldErrors(
   issues: { path: PropertyKey[]; message: string }[],
@@ -45,22 +45,6 @@ function readFormData(formData: FormData) {
     password: readString("password"),
     confirmPassword: readString("confirmPassword"),
   };
-}
-
-function getSiteUrl(): string | null {
-  const parsed = z.string().url().safeParse(process.env.NEXT_PUBLIC_SITE_URL);
-  if (!parsed.success) return null;
-
-  const parsedSiteUrl = new URL(parsed.data);
-  if (
-    parsedSiteUrl.protocol !== "https:" &&
-    parsedSiteUrl.hostname !== "localhost" &&
-    parsedSiteUrl.hostname !== "127.0.0.1"
-  ) {
-    return null;
-  }
-
-  return parsedSiteUrl.origin;
 }
 
 export async function signIn(
@@ -112,13 +96,12 @@ export async function signUp(
     };
   }
 
-  const siteUrl = getSiteUrl();
+  const setupMessage = getAuthSetupMessage({ registration: true });
 
-  if (!siteUrl) {
+  if (setupMessage) {
     return {
       status: "error",
-      message:
-        "Registration needs a valid NEXT_PUBLIC_SITE_URL in .env.local to configure the confirmation link.",
+      message: setupMessage,
     };
   }
 
@@ -128,6 +111,15 @@ export async function signUp(
     return {
       status: "error",
       message: "Authentication is not configured. Add the Supabase values to .env.local.",
+    };
+  }
+
+  const siteUrl = getAuthSiteUrl();
+  if (!siteUrl) {
+    return {
+      status: "error",
+      message:
+        "Registration needs a valid NEXT_PUBLIC_SITE_URL in .env.local to configure the confirmation link.",
     };
   }
 

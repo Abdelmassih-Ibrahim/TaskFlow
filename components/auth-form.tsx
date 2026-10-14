@@ -12,6 +12,7 @@ import {
 type AuthFormProps = {
   mode: "sign-in" | "sign-up";
   notice?: string;
+  noticeIsError?: boolean;
 };
 
 const inputClassName =
@@ -20,13 +21,16 @@ const inputClassName =
 function AuthFeedback({
   state,
   notice,
+  noticeIsError = false,
 }: {
   state: AuthActionState;
   notice?: string;
+  noticeIsError?: boolean;
 }) {
   if (state.status === "idle" && !notice) return null;
 
-  const isError = state.status === "error";
+  const isError =
+    state.status === "error" || (state.status === "idle" && noticeIsError);
   const message = state.status === "idle" ? notice : state.message;
 
   return (
@@ -44,7 +48,11 @@ function AuthFeedback({
   );
 }
 
-export function AuthForm({ mode, notice }: AuthFormProps) {
+export function AuthForm({
+  mode,
+  notice,
+  noticeIsError,
+}: AuthFormProps) {
   const action = mode === "sign-in" ? signIn : signUp;
   const [state, formAction, pending] = useActionState(
     action,
@@ -82,7 +90,11 @@ export function AuthForm({ mode, notice }: AuthFormProps) {
           </p>
 
           <div className="mt-6">
-            <AuthFeedback state={state} notice={notice} />
+            <AuthFeedback
+              state={state}
+              notice={notice}
+              noticeIsError={noticeIsError}
+            />
           </div>
 
           <form action={formAction} aria-busy={pending} className="space-y-4">
