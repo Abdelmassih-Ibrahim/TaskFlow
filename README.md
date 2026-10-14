@@ -6,7 +6,7 @@ TaskFlow is a project and task management app in progress. This repository curre
 
 ## Prerequisites
 
-- Node.js 20.9 or later (Node.js 26.7 was used for this milestone).
+- A currently supported Node.js LTS release. Next.js 16 requires Node.js 20.9 or later; Node.js 26.7.0 was used for this milestone.
 - npm, included with Node.js.
 
 ## Run locally
