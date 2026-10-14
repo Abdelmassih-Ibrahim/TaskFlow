@@ -91,12 +91,12 @@ describe("workspace dashboard", () => {
     render(<WorkspaceDashboard {...workspace} />);
 
     expect(
-      screen.getByRole("progressbar", { name: "Website refresh progress" }),
+      screen.getByRole("progressbar", { name: "Förlopp för Website refresh" }),
     ).toHaveAttribute("aria-valuenow", "50");
-    expect(screen.getByText("1 of 2 complete")).toBeVisible();
+    expect(screen.getByText("1 av 2 klara")).toBeVisible();
 
     const priorityFilter = screen.getByRole("combobox", {
-      name: "Filter by priority",
+      name: "Filtrera efter prioritet",
     });
     fireEvent.change(priorityFilter, { target: { value: "high" } });
 
@@ -110,11 +110,11 @@ describe("workspace dashboard", () => {
   it("shows an empty project state and disables task creation when no project exists", () => {
     render(<WorkspaceDashboard projects={[]} tasks={[]} error={null} />);
 
-    expect(screen.getByText("Start with a project")).toBeVisible();
+    expect(screen.getByText("Börja med ett projekt")).toBeVisible();
     expect(
-      screen.getByRole("button", { name: "Add task" }),
+      screen.getByRole("button", { name: "Lägg till uppgift" }),
     ).toBeDisabled();
-    expect(screen.getByText("No tasks yet")).toBeVisible();
+    expect(screen.getByText("Inga uppgifter ännu")).toBeVisible();
   });
 
   it("shows a recoverable workspace error instead of empty-looking data", () => {
@@ -122,15 +122,15 @@ describe("workspace dashboard", () => {
       <WorkspaceDashboard
         projects={[]}
         tasks={[]}
-        error="We couldn't load your projects. Please try again."
+        error="Det gick inte att läsa in dina projekt. Försök igen."
       />,
     );
 
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "We couldn't load your projects.",
+      "Det gick inte att läsa in dina projekt.",
     );
-    expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
-    expect(screen.queryByText("Start with a project")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Försök igen" })).toBeVisible();
+    expect(screen.queryByText("Börja med ett projekt")).not.toBeInTheDocument();
   });
 
   it("displays the sign-out failure notice returned by the server action", () => {
@@ -139,30 +139,30 @@ describe("workspace dashboard", () => {
     );
 
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "We couldn't sign you out. Please try again.",
+      "Det gick inte att logga ut. Försök igen.",
     );
     fireEvent.click(
-      screen.getByRole("button", { name: "Dismiss sign-out error" }),
+      screen.getByRole("button", { name: "Stäng meddelandet om utloggningsfel" }),
     );
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 
     rerender(<WorkspaceDashboard {...workspace} signOutError={false} />);
     rerender(<WorkspaceDashboard {...workspace} signOutError />);
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "We couldn't sign you out. Please try again.",
+      "Det gick inte att logga ut. Försök igen.",
     );
   });
 
   it("clears active filters from the task list", () => {
     render(<WorkspaceDashboard {...workspace} />);
-    fireEvent.change(screen.getByRole("combobox", { name: "Filter by priority" }), {
+    fireEvent.change(screen.getByRole("combobox", { name: "Filtrera efter prioritet" }), {
       target: { value: "low" },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+    fireEvent.click(screen.getByRole("button", { name: "Rensa filter" }));
 
     expect(
-      screen.getByRole("combobox", { name: "Filter by priority" }),
+      screen.getByRole("combobox", { name: "Filtrera efter prioritet" }),
     ).toHaveValue("all");
     expect(
       within(screen.getByRole("table")).getByText("Prepare release notes"),
@@ -174,28 +174,28 @@ describe("project and task forms", () => {
   it("renders required project fields with validation descriptions", () => {
     render(<ProjectDialog project={null} onClose={vi.fn()} />);
 
-    expect(screen.getByLabelText("Project name")).toBeRequired();
-    expect(screen.getByLabelText("Description Optional")).toBeInTheDocument();
+    expect(screen.getByLabelText("Projektnamn")).toBeRequired();
+    expect(screen.getByLabelText("Beskrivning Valfritt")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Create project" }),
+      screen.getByRole("button", { name: "Skapa projekt" }),
     ).toBeEnabled();
   });
 
   it("renders the task fields, including status, priority, and due date", () => {
     render(<TaskDialog task={null} projects={[project]} onClose={vi.fn()} />);
 
-    expect(screen.getByLabelText("Task title")).toBeRequired();
-    expect(screen.getByLabelText("Project")).toHaveValue(project.id);
+    expect(screen.getByLabelText("Uppgiftstitel")).toBeRequired();
+    expect(screen.getByLabelText("Projekt")).toHaveValue(project.id);
     expect(screen.getByLabelText("Status")).toHaveValue("todo");
-    expect(screen.getByLabelText("Priority")).toHaveValue("medium");
-    expect(screen.getByLabelText("Due date")).toHaveAttribute("type", "date");
+    expect(screen.getByLabelText("Prioritet")).toHaveValue("medium");
+    expect(screen.getByLabelText("Förfallodatum")).toHaveAttribute("type", "date");
   });
 
   it("associates a server validation error with the project name field", async () => {
     mocks.createProject.mockResolvedValue({
       status: "error",
-      message: "Check the fields below and try again.",
-      fieldErrors: { name: "Enter a project name." },
+      message: "Kontrollera fälten nedan och försök igen.",
+      fieldErrors: { name: "Ange ett projektnamn." },
     });
     const { container } = render(
       <ProjectDialog project={null} onClose={vi.fn()} />,
@@ -205,13 +205,13 @@ describe("project and task forms", () => {
 
     fireEvent.submit(form);
 
-    expect(await screen.findByText("Enter a project name.")).toBeVisible();
-    expect(screen.getByLabelText("Project name")).toHaveAttribute(
+    expect(await screen.findByText("Ange ett projektnamn.")).toBeVisible();
+    expect(screen.getByLabelText("Projektnamn")).toHaveAttribute(
       "aria-invalid",
       "true",
     );
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Check the fields below and try again.",
+      "Kontrollera fälten nedan och försök igen.",
     );
   });
 
@@ -224,16 +224,16 @@ describe("project and task forms", () => {
         }),
     );
     render(<ProjectDialog project={null} onClose={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText("Project name"), {
+    fireEvent.change(screen.getByLabelText("Projektnamn"), {
       target: { value: "Portfolio work" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Create project" }));
+    fireEvent.click(screen.getByRole("button", { name: "Skapa projekt" }));
 
     const submitButton = await screen.findByRole("button", {
-      name: "Saving...",
+      name: "Sparar...",
     });
     expect(submitButton).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Avbryt" })).toBeDisabled();
 
     await act(async () => {
       resolveAction?.({

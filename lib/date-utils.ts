@@ -6,10 +6,10 @@ export function formatDueDate(dueDate: string, today = new Date()): string {
     (taskDate.getTime() - todayDate.getTime()) / 86_400_000,
   );
 
-  if (differenceInDays === 0) return "Today";
-  if (differenceInDays === 1) return "Tomorrow";
+  if (differenceInDays === 0) return "Idag";
+  if (differenceInDays === 1) return "Imorgon";
 
-  return taskDate.toLocaleDateString("en-US", {
+  return taskDate.toLocaleDateString("sv-SE", {
     month: "short",
     day: "numeric",
   });

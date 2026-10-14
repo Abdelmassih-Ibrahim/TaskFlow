@@ -30,20 +30,20 @@ describe("authentication forms", () => {
   it("renders labeled sign-in fields and a registration link", () => {
     render(<AuthForm mode="sign-in" />);
 
-    expect(screen.getByRole("heading", { name: "Welcome back" })).toBeVisible();
-    expect(screen.getByLabelText("Email address")).toHaveAttribute(
+    expect(screen.getByRole("heading", { name: "Välkommen tillbaka" })).toBeVisible();
+    expect(screen.getByLabelText("E-postadress")).toHaveAttribute(
       "autocomplete",
       "email",
     );
-    expect(screen.getByLabelText("Password")).toHaveAttribute(
+    expect(screen.getByLabelText("Lösenord")).toHaveAttribute(
       "autocomplete",
       "current-password",
     );
     expect(
-      screen.getByRole("link", { name: "Create an account" }),
+      screen.getByRole("link", { name: "Skapa ett konto" }),
     ).toHaveAttribute("href", "/register");
     expect(
-      screen.queryByLabelText("Confirm password"),
+      screen.queryByLabelText("Bekräfta lösenord"),
     ).not.toBeInTheDocument();
   });
 
@@ -51,34 +51,34 @@ describe("authentication forms", () => {
     render(
       <AuthForm
         mode="sign-up"
-        notice="Supabase is not configured."
+        notice="Supabase är inte konfigurerat."
         noticeIsError
       />,
     );
 
     expect(
-      screen.getByRole("heading", { name: "Create your account" }),
+      screen.getByRole("heading", { name: "Skapa ditt konto" }),
     ).toBeVisible();
-    expect(screen.getByLabelText("Confirm password")).toHaveAttribute(
+    expect(screen.getByLabelText("Bekräfta lösenord")).toHaveAttribute(
       "autocomplete",
       "new-password",
     );
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Supabase is not configured.",
+      "Supabase är inte konfigurerat.",
     );
-    expect(screen.getByRole("button", { name: "Create account" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Skapa konto" })).toBeEnabled();
   });
 
   it("shows a confirmation notice as a polite status message", () => {
     render(
       <AuthForm
         mode="sign-up"
-        notice="Check your email for a confirmation link."
+        notice="Kontrollera din e-post för en bekräftelselänk."
       />,
     );
 
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Check your email for a confirmation link.",
+      "Kontrollera din e-post för en bekräftelselänk.",
     );
   });
 });

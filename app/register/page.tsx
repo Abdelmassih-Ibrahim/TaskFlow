@@ -12,7 +12,7 @@ export default async function RegisterPage({
   const notice =
     getAuthSetupMessage({ registration: true }) ??
     (error === "configuration"
-      ? "Add your Supabase project URL and publishable key to .env.local before creating an account."
+      ? "Lägg till Supabase-projektets URL och publishable key i .env.local innan du skapar ett konto."
       : undefined);
 
   return (

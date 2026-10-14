@@ -3,13 +3,13 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TaskFlow — Make space for meaningful work",
-  description: "A thoughtful project and task management workspace.",
+  title: "TaskFlow — Skapa utrymme för meningsfullt arbete",
+  description: "En genomtänkt arbetsyta för projekt och uppgifter.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="sv">
       <body>{children}</body>
     </html>
   );

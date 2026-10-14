@@ -7,10 +7,10 @@ describe("workspace loading state", () => {
     render(<WorkspaceLoading />);
 
     expect(
-      screen.getByRole("main", { name: "Loading your workspace" }),
+      screen.getByRole("main", { name: "Läser in din arbetsyta" }),
     ).toHaveAttribute("aria-busy", "true");
     expect(
-      screen.getByText("Loading your projects and tasks..."),
+      screen.getByText("Läser in dina projekt och uppgifter..."),
     ).toBeInTheDocument();
   });
 });

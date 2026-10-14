@@ -30,7 +30,7 @@ describe("demo task summaries", () => {
 
 describe("demo task due dates", () => {
   it("labels today's and tomorrow's due dates clearly", () => {
-    expect(formatDueDate("2026-10-14", today)).toBe("Today");
-    expect(formatDueDate("2026-10-15", today)).toBe("Tomorrow");
+    expect(formatDueDate("2026-10-14", today)).toBe("Idag");
+    expect(formatDueDate("2026-10-15", today)).toBe("Imorgon");
   });
 });

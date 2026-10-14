@@ -5,21 +5,21 @@ export function getAuthErrorMessage(
   intent: AuthIntent,
 ): string {
   if (code === "invalid_credentials") {
-    return "The email address or password is incorrect.";
+    return "E-postadressen eller lösenordet är felaktigt.";
   }
 
   if (code === "email_not_confirmed") {
-    return "Confirm your email address before signing in.";
+    return "Bekräfta din e-postadress innan du loggar in.";
   }
 
   if (
     code === "over_email_send_rate_limit" ||
     code === "over_request_rate_limit"
   ) {
-    return "Too many attempts. Wait a little while, then try again.";
+    return "För många försök. Vänta en stund och försök igen.";
   }
 
   return intent === "sign-up"
-    ? "We couldn't create your account. Check your details and try again."
-    : "We couldn't sign you in right now. Please try again.";
+    ? "Det gick inte att skapa ditt konto. Kontrollera uppgifterna och försök igen."
+    : "Det gick inte att logga in just nu. Försök igen.";
 }

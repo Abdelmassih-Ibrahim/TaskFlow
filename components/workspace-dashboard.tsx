@@ -48,11 +48,11 @@ function SignOutFailureNotice() {
       role="alert"
       className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
     >
-      <span>We couldn't sign you out. Please try again.</span>
+      <span>Det gick inte att logga ut. Försök igen.</span>
       <button
         type="button"
         onClick={() => setDismissed(true)}
-        aria-label="Dismiss sign-out error"
+        aria-label="Stäng meddelandet om utloggningsfel"
         className="rounded p-1 text-rose-800 hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-700"
       >
         <X size={16} aria-hidden="true" />
@@ -125,11 +125,11 @@ export function WorkspaceDashboard({
   const today = new Date();
   const greeting =
     today.getHours() < 12
-      ? "Good morning"
+      ? "God morgon"
       : today.getHours() < 18
-        ? "Good afternoon"
-        : "Good evening";
-  const formattedToday = today.toLocaleDateString("en-US", {
+        ? "God eftermiddag"
+        : "God kväll";
+  const formattedToday = today.toLocaleDateString("sv-SE", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -156,7 +156,7 @@ export function WorkspaceDashboard({
               <button
                 type="button"
                 onClick={() => setNotice(null)}
-                aria-label="Dismiss notification"
+                aria-label="Stäng meddelandet"
                 className="rounded p-1 text-teal-800 hover:bg-teal-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-700"
               >
                 <X size={16} aria-hidden="true" />
@@ -169,7 +169,7 @@ export function WorkspaceDashboard({
               className="mb-7 rounded-xl border border-rose-200 bg-rose-50 p-5"
             >
               <h1 className="text-lg font-semibold text-rose-900">
-                Workspace unavailable
+                Arbetsytan är inte tillgänglig
               </h1>
               <p className="mt-1 text-sm text-rose-800">{error}</p>
               <button
@@ -177,7 +177,7 @@ export function WorkspaceDashboard({
                 onClick={() => window.location.reload()}
                 className="mt-4 rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm font-semibold text-rose-900 hover:bg-rose-100"
               >
-                Try again
+                Försök igen
               </button>
             </section>
           ) : (
@@ -188,11 +188,11 @@ export function WorkspaceDashboard({
                     {formattedToday}
                   </p>
                   <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-[34px]">
-                    {greeting}, welcome back
+                    {greeting}, välkommen tillbaka
                     <span className="text-teal-600">.</span>
                   </h1>
                   <p className="mt-2 text-[15px] text-slate-500">
-                    Here&apos;s what&apos;s happening across your workspace.
+                    Här är en översikt över din arbetsyta.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -207,7 +207,7 @@ export function WorkspaceDashboard({
                     className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
                   >
                     <FolderKanban size={16} aria-hidden="true" />
-                    New project
+                    Nytt projekt
                   </button>
                   <button
                     type="button"
@@ -220,30 +220,30 @@ export function WorkspaceDashboard({
                     disabled={projects.length === 0}
                     title={
                       projects.length === 0
-                        ? "Create a project before adding a task."
+                        ? "Skapa ett projekt innan du lägger till en uppgift."
                         : undefined
                     }
                     className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Plus size={16} aria-hidden="true" />
-                    New task
+                    Ny uppgift
                   </button>
                 </div>
               </div>
 
               <section
-                aria-label="Workspace data"
+                aria-label="Data för arbetsytan"
                 className="mb-7 flex items-start gap-3 rounded-xl border border-teal-100 bg-teal-50/70 px-4 py-3.5 sm:items-center"
               >
                 <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 shadow-sm sm:mt-0">
                   <Sparkles size={16} aria-hidden="true" />
                 </span>
                 <p className="text-sm leading-6 text-teal-950">
-                  <span className="font-semibold">Your saved workspace</span>
+                  <span className="font-semibold">Din sparade arbetsyta</span>
                   <span className="text-teal-800">
                     {" "}
-                    — Projects and tasks are stored in your account. Access is
-                    limited to projects you own.
+                    — Projekt och uppgifter lagras på ditt konto. Du har endast
+                    åtkomst till projekt som du äger.
                   </span>
                 </p>
               </section>
@@ -254,31 +254,31 @@ export function WorkspaceDashboard({
                     id="overview-heading"
                     className="text-base font-semibold text-slate-900"
                   >
-                    Overview
+                    Översikt
                   </h2>
                   <span className="text-xs font-medium text-slate-400">
-                    LIVE DATA
+                    SPARADE DATA
                   </span>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   <SummaryCard
-                    label="Total tasks"
+                    label="Totalt antal uppgifter"
                     value={summary.total}
-                    description="Across your projects"
+                    description="I alla dina projekt"
                     icon={ListTodo}
                     iconClass="bg-blue-50 text-blue-700"
                   />
                   <SummaryCard
-                    label="Completed"
+                    label="Slutförda"
                     value={summary.completed}
-                    description="Tasks marked as done"
+                    description="Uppgifter markerade som klara"
                     icon={Check}
                     iconClass="bg-emerald-50 text-emerald-700"
                   />
                   <SummaryCard
-                    label="Overdue"
+                    label="Försenade"
                     value={summary.overdue}
-                    description="Unfinished and past due"
+                    description="Oavslutade med passerat datum"
                     icon={Clock3}
                     iconClass="bg-rose-50 text-rose-700"
                   />
@@ -292,10 +292,10 @@ export function WorkspaceDashboard({
                       id="projects-heading"
                       className="text-base font-semibold text-slate-900"
                     >
-                      Your projects
+                      Dina projekt
                     </h2>
                     <p className="mt-1 text-sm text-slate-500">
-                      {projects.length} {projects.length === 1 ? "project" : "projects"} in your workspace.
+                      {projects.length} projekt i din arbetsyta.
                     </p>
                   </div>
                   <button
@@ -309,7 +309,7 @@ export function WorkspaceDashboard({
                     className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50"
                   >
                     <Plus size={16} aria-hidden="true" />
-                    Add project
+                    Lägg till projekt
                   </button>
                 </div>
                 {projects.length === 0 ? (
@@ -320,10 +320,10 @@ export function WorkspaceDashboard({
                       className="mx-auto text-slate-400"
                     />
                     <h3 className="mt-3 text-sm font-semibold text-slate-800">
-                      Start with a project
+                      Börja med ett projekt
                     </h3>
                     <p className="mt-1 text-sm text-slate-500">
-                      Create a project to organize and add tasks.
+                      Skapa ett projekt för att organisera och lägga till uppgifter.
                     </p>
                     <button
                       type="button"
@@ -335,7 +335,7 @@ export function WorkspaceDashboard({
                       }
                       className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
                     >
-                      Create your first project
+                      Skapa ditt första projekt
                     </button>
                   </div>
                 ) : (
@@ -355,8 +355,8 @@ export function WorkspaceDashboard({
                             <p className="mt-1 text-xs text-slate-500">
                               {progress?.total ?? 0}{" "}
                               {progress?.total === 1
-                                ? "task"
-                                : "tasks"}
+                                ? "uppgift"
+                                : "uppgifter"}
                             </p>
                           </div>
                           <FolderKanban
@@ -369,14 +369,14 @@ export function WorkspaceDashboard({
                             <div className="mt-4">
                               <div className="mb-1.5 flex items-center justify-between text-xs text-slate-500">
                                 <span>
-                                  {progress.completed} of {progress.total}{" "}
-                                  complete
+                                  {progress.completed} av {progress.total}{" "}
+                                  klara
                                 </span>
                                 <span>{progress.percentage}%</span>
                               </div>
                               <div
                                 role="progressbar"
-                                aria-label={`${project.name} progress`}
+                                aria-label={`Förlopp för ${project.name}`}
                                 aria-valuemin={0}
                                 aria-valuemax={100}
                                 aria-valuenow={progress.percentage}
@@ -390,7 +390,7 @@ export function WorkspaceDashboard({
                             </div>
                         ) : (
                           <p className="mt-4 text-xs text-slate-500">
-                            No tasks yet
+                            Inga uppgifter ännu
                           </p>
                         )}
                         {project.description && (
@@ -409,13 +409,13 @@ export function WorkspaceDashboard({
                             }
                             className="rounded-md px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                           >
-                            Edit
+                            Redigera
                           </button>
                           <DeleteRecordButton
                             id={project.id}
-                            label="Delete"
-                            ariaLabel={`Delete project ${project.name}`}
-                            confirmMessage={`Delete “${project.name}” and all of its tasks? This cannot be undone.`}
+                            label="Ta bort"
+                            ariaLabel={`Ta bort projektet ${project.name}`}
+                            confirmMessage={`Ta bort ”${project.name}” och alla dess uppgifter? Åtgärden kan inte ångras.`}
                             action={deleteProject}
                           />
                         </div>
@@ -433,13 +433,13 @@ export function WorkspaceDashboard({
                       id="tasks-heading"
                       className="text-base font-semibold text-slate-900"
                     >
-                      Your tasks
+                      Dina uppgifter
                       <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
                         {summary.total}
                       </span>
                     </h2>
                     <p className="mt-1 text-sm text-slate-500">
-                      Search, filter, and organize tasks across your projects.
+                      Sök, filtrera och organisera uppgifter i dina projekt.
                     </p>
                   </div>
                   <button
@@ -454,13 +454,13 @@ export function WorkspaceDashboard({
                     className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Plus size={15} aria-hidden="true" />
-                    Add task
+                    Lägg till uppgift
                   </button>
                 </div>
 
                 <div className="mb-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_150px_150px_180px_150px_auto]">
                   <label className="relative block">
-                    <span className="sr-only">Search tasks</span>
+                    <span className="sr-only">Sök uppgifter</span>
                     <Search
                       size={16}
                       aria-hidden="true"
@@ -470,14 +470,14 @@ export function WorkspaceDashboard({
                       type="search"
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
-                      placeholder="Search tasks or projects"
+                      placeholder="Sök uppgifter eller projekt"
                       className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
                     />
                   </label>
                   <label>
-                    <span className="sr-only">Filter by priority</span>
+                    <span className="sr-only">Filtrera efter prioritet</span>
                     <select
-                      aria-label="Filter by priority"
+                      aria-label="Filtrera efter prioritet"
                       value={priority}
                       onChange={(event) => {
                         const value = event.target.value;
@@ -492,14 +492,14 @@ export function WorkspaceDashboard({
                       }}
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
                     >
-                      <option value="all">All priorities</option>
-                      <option value="high">High priority</option>
-                      <option value="medium">Medium priority</option>
-                      <option value="low">Low priority</option>
+                      <option value="all">Alla prioriteter</option>
+                      <option value="high">Hög prioritet</option>
+                      <option value="medium">Medelhög prioritet</option>
+                      <option value="low">Låg prioritet</option>
                     </select>
                   </label>
                   <label>
-                    <span className="sr-only">Filter by status</span>
+                    <span className="sr-only">Filtrera efter status</span>
                     <select
                       value={status}
                       onChange={(event) => {
@@ -515,20 +515,20 @@ export function WorkspaceDashboard({
                       }}
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
                     >
-                      <option value="all">All statuses</option>
-                      <option value="todo">To do</option>
-                      <option value="in_progress">In progress</option>
-                      <option value="done">Done</option>
+                      <option value="all">Alla statusar</option>
+                      <option value="todo">Att göra</option>
+                      <option value="in_progress">Pågår</option>
+                      <option value="done">Klar</option>
                     </select>
                   </label>
                   <label>
-                    <span className="sr-only">Filter by project</span>
+                    <span className="sr-only">Filtrera efter projekt</span>
                     <select
                       value={projectId}
                       onChange={(event) => setProjectId(event.target.value)}
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
                     >
-                      <option value="">All projects</option>
+                      <option value="">Alla projekt</option>
                       {projects.map((project) => (
                         <option key={project.id} value={project.id}>
                           {project.name}
@@ -537,7 +537,7 @@ export function WorkspaceDashboard({
                     </select>
                   </label>
                   <label>
-                    <span className="sr-only">Sort tasks</span>
+                    <span className="sr-only">Sortera uppgifter</span>
                     <select
                       value={sort}
                       onChange={(event) => {
@@ -548,10 +548,10 @@ export function WorkspaceDashboard({
                       }}
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
                     >
-                      <option value="due_date">Sort: due date</option>
-                      <option value="title">Sort: title</option>
-                      <option value="priority">Sort: priority</option>
-                      <option value="status">Sort: status</option>
+                      <option value="due_date">Sortera: förfallodatum</option>
+                      <option value="title">Sortera: titel</option>
+                      <option value="priority">Sortera: prioritet</option>
+                      <option value="status">Sortera: status</option>
                     </select>
                   </label>
                   {hasFilters && (
@@ -565,7 +565,7 @@ export function WorkspaceDashboard({
                       }}
                       className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
                     >
-                      Clear filters
+                      Rensa filter
                     </button>
                   )}
                 </div>

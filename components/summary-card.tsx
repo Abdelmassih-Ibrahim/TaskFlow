@@ -24,7 +24,7 @@ export function SummaryCard({
           <Icon size={19} strokeWidth={1.9} aria-hidden="true" />
         </span>
         <span className="rounded-md bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-500">
-          Workspace
+          Arbetsyta
         </span>
       </div>
       <p className="mt-5 text-sm font-medium text-slate-500">{label}</p>
@@ -35,7 +35,7 @@ export function SummaryCard({
         <p className="text-right text-xs text-slate-400">{description}</p>
       </div>
       <p className="mt-3 text-xs text-slate-400">
-        From your saved tasks
+        Baserat på dina sparade uppgifter
       </p>
     </article>
   );

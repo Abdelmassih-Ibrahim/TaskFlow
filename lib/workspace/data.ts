@@ -14,7 +14,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
   if (!supabase) {
     return {
       ...emptyWorkspace,
-      error: "Workspace data is unavailable. Check the Supabase configuration.",
+      error: "Arbetsytans data är inte tillgänglig. Kontrollera Supabase-konfigurationen.",
     };
   }
 
@@ -29,7 +29,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
   if (projectsError) {
     return {
       ...emptyWorkspace,
-      error: "We couldn't load your projects. Please try again.",
+      error: "Det gick inte att läsa in dina projekt. Försök igen.",
     };
   }
 
@@ -57,7 +57,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
   if (tasksError) {
     return {
       ...emptyWorkspace,
-      error: "We couldn't load your tasks. Please try again.",
+      error: "Det gick inte att läsa in dina uppgifter. Försök igen.",
     };
   }
 

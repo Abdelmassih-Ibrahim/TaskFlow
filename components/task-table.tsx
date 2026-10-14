@@ -14,9 +14,15 @@ const statusStyles = {
 } as const;
 
 const statusLabels = {
-  todo: "To do",
-  in_progress: "In progress",
-  done: "Done",
+  todo: "Att göra",
+  in_progress: "Pågår",
+  done: "Klar",
+} as const;
+
+const priorityLabels = {
+  low: "Låg",
+  medium: "Medel",
+  high: "Hög",
 } as const;
 
 const priorityStyles = {
@@ -44,16 +50,16 @@ function TaskActions({
       <button
         type="button"
         onClick={() => onEdit(task)}
-        aria-label={`Edit ${task.title}`}
+        aria-label={`Redigera ${task.title}`}
         className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
       >
         <Pencil size={15} aria-hidden="true" />
       </button>
       <DeleteRecordButton
         id={task.id}
-        label="Delete"
-        ariaLabel={`Delete task ${task.title}`}
-        confirmMessage={`Delete “${task.title}”? This cannot be undone.`}
+        label="Ta bort"
+        ariaLabel={`Ta bort uppgiften ${task.title}`}
+        confirmMessage={`Ta bort ”${task.title}”? Åtgärden kan inte ångras.`}
         action={deleteTask}
       />
     </div>
@@ -75,12 +81,12 @@ export function TaskTable({
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-white px-5 py-12 text-center">
         <h3 className="text-sm font-semibold text-slate-800">
-          {totalTasks === 0 ? "No tasks yet" : "No tasks match these filters"}
+          {totalTasks === 0 ? "Inga uppgifter ännu" : "Inga uppgifter matchar filtreringen"}
         </h3>
         <p className="mt-1 text-sm text-slate-500">
           {totalTasks === 0
-            ? "Create a task to add the first piece of work to your projects."
-            : "Try changing the search or filters."}
+            ? "Skapa en uppgift för att lägga till det första arbetet i dina projekt."
+            : "Prova att ändra sökningen eller filtren."}
         </p>
       </div>
     );
@@ -92,12 +98,12 @@ export function TaskTable({
         <table className="w-full min-w-[900px] border-collapse text-left">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/70">
-              <th scope="col" className="w-[31%] px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Task</th>
-              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Project</th>
-              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Due date</th>
-              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Priority</th>
+              <th scope="col" className="w-[31%] px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Uppgift</th>
+              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Projekt</th>
+              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Förfallodatum</th>
+              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Prioritet</th>
               <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Status</th>
-              <th scope="col" className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Actions</th>
+              <th scope="col" className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Åtgärder</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -122,16 +128,16 @@ export function TaskTable({
                   </th>
                   <td className="px-4 py-3.5 text-xs text-slate-500">{task.project.name}</td>
                   <td className={`px-4 py-3.5 text-xs ${overdue ? "font-medium text-rose-600" : "text-slate-500"}`}>
-                    {task.due_date ? formatDueDate(task.due_date, today) : "No due date"}
+                    {task.due_date ? formatDueDate(task.due_date, today) : "Inget förfallodatum"}
                     {overdue && (
                       <span className="ml-1.5 text-[10px] font-semibold text-rose-700">
-                        Overdue
+                        Försenad
                       </span>
                     )}
                   </td>
                   <td className={`px-4 py-3.5 text-xs font-medium ${priorityStyles[task.priority]}`}>
                     <span className={`mr-1.5 inline-block size-1.5 rounded-full align-middle ${task.priority === "high" ? "bg-rose-500" : task.priority === "medium" ? "bg-amber-500" : "bg-slate-300"}`} />
-                    {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                    {priorityLabels[task.priority]}
                   </td>
                   <td className="px-4 py-3.5">
                     <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-semibold ${statusStyles[task.status]}`}>
@@ -173,11 +179,11 @@ export function TaskTable({
                 <span className="max-w-full truncate rounded bg-slate-50 px-2 py-1">{task.project.name}</span>
                 <span className={`rounded px-2 py-1 ${statusStyles[task.status]}`}>{statusLabels[task.status]}</span>
                 <span className={`rounded bg-slate-50 px-2 py-1 ${priorityStyles[task.priority]}`}>
-                  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} priority
+                  {priorityLabels[task.priority]} prioritet
                 </span>
                 <span className={overdue ? "font-medium text-rose-600" : ""}>
-                  {task.due_date ? formatDueDate(task.due_date, today) : "No due date"}
-                  {overdue ? " · Overdue" : ""}
+                  {task.due_date ? formatDueDate(task.due_date, today) : "Inget förfallodatum"}
+                  {overdue ? " · Försenad" : ""}
                 </span>
               </div>
             </li>
@@ -187,10 +193,10 @@ export function TaskTable({
 
       <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3">
         <p className="text-xs text-slate-400">
-          Showing {tasks.length} of {totalTasks} tasks
+          Visar {tasks.length} av {totalTasks} uppgifter
         </p>
         <span className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-          Saved workspace
+          Sparad arbetsyta
         </span>
       </div>
     </div>

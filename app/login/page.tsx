@@ -11,9 +11,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const message =
     setupMessage ??
     (notice === "signed-out"
-      ? "You have been signed out."
+      ? "Du har loggat ut."
       : error === "confirmation"
-        ? "That confirmation link could not be used. Request a new link by registering again."
+        ? "Bekräftelselänken kunde inte användas. Registrera dig igen för att få en ny länk."
         : undefined);
 
   return (

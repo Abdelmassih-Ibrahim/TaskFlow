@@ -23,7 +23,7 @@ export default async function ProtectedLayout({
 
   return (
     <>
-      <AppNavigation email={user.email ?? "Signed-in account"} />
+      <AppNavigation email={user.email ?? "Inloggat konto"} />
       {children}
     </>
   );

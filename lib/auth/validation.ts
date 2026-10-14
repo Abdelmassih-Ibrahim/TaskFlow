@@ -3,14 +3,14 @@ import { z } from "zod";
 const emailSchema = z
   .string()
   .trim()
-  .min(1, "Enter your email address.")
-  .email("Enter a valid email address.")
-  .max(254, "Email addresses must be 254 characters or fewer.");
+  .min(1, "Ange din e-postadress.")
+  .email("Ange en giltig e-postadress.")
+  .max(254, "E-postadressen får innehålla högst 254 tecken.");
 
 const passwordSchema = z
   .string()
-  .min(8, "Use at least 8 characters.")
-  .max(72, "Passwords must be 72 characters or fewer.");
+  .min(8, "Använd minst 8 tecken.")
+  .max(72, "Lösenordet får innehålla högst 72 tecken.");
 
 export const signInSchema = z.object({
   email: emailSchema,
@@ -21,9 +21,9 @@ export const signUpSchema = z
   .object({
     email: emailSchema,
     password: passwordSchema,
-    confirmPassword: z.string().min(1, "Confirm your password."),
+    confirmPassword: z.string().min(1, "Bekräfta ditt lösenord."),
   })
   .refine((values) => values.password === values.confirmPassword, {
     path: ["confirmPassword"],
-    message: "Passwords do not match.",
+    message: "Lösenorden stämmer inte överens.",
   });

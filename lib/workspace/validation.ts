@@ -1,22 +1,22 @@
 import { z } from "zod";
 import { taskPriorities, taskStatuses } from "./types";
 
-const projectIdSchema = z.string().uuid("Choose a valid project.");
-const recordIdSchema = z.string().uuid("This item could not be found.");
+const projectIdSchema = z.string().uuid("Välj ett giltigt projekt.");
+const recordIdSchema = z.string().uuid("Det gick inte att hitta objektet.");
 
 const optionalDescriptionSchema = (maximum: number) =>
   z
     .string()
     .trim()
-    .max(maximum, `Use no more than ${maximum} characters.`)
+    .max(maximum, `Använd högst ${maximum} tecken.`)
     .transform((value) => value || null);
 
 const projectFields = {
   name: z
     .string()
     .trim()
-    .min(1, "Enter a project name.")
-    .max(120, "Project names must be 120 characters or fewer."),
+    .min(1, "Ange ett projektnamn.")
+    .max(120, "Projektnamnet får innehålla högst 120 tecken."),
   description: optionalDescriptionSchema(2000),
 };
 
@@ -33,18 +33,18 @@ const taskFields = {
   title: z
     .string()
     .trim()
-    .min(1, "Enter a task title.")
-    .max(200, "Task titles must be 200 characters or fewer."),
+    .min(1, "Ange en uppgiftstitel.")
+    .max(200, "Uppgiftstiteln får innehålla högst 200 tecken."),
   description: optionalDescriptionSchema(5000),
-  status: z.enum(taskStatuses, { error: "Choose a valid task status." }),
-  priority: z.enum(taskPriorities, { error: "Choose a valid task priority." }),
+  status: z.enum(taskStatuses, { error: "Välj en giltig uppgiftsstatus." }),
+  priority: z.enum(taskPriorities, { error: "Välj en giltig prioritet." }),
   dueDate: z
     .string()
     .trim()
     .transform((value) => value || null)
     .refine(
       (value) => value === null || z.iso.date().safeParse(value).success,
-      "Enter a valid due date.",
+      "Ange ett giltigt förfallodatum.",
     ),
 };
 

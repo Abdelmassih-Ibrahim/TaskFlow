@@ -13,9 +13,45 @@ filtrering, sammanfattningar och en responsiv dashboard.
 
 ## Skärmbilder
 
-Skärmbilder har inte lagts till ännu. Lägg till autentiska bilder från appen
-efter att en lokal miljö har konfigurerats och använd tydliga desktop- och
-mobilvyer. Inga demo- eller produktionsbilder påstås finnas i repot.
+Inga skärmbilder finns i repot ännu. En lämplig plats för framtida, autentiska
+bilder är `docs/screenshots/`. Lägg inte in skärmbildsreferenser här förrän
+respektive bild faktiskt har skapats och granskats. Skärmbilder ska visa den
+aktuella implementationen och inte antyda att en liveintegration har verifierats.
+
+### Så kan skärmbilder tas när en testmiljö finns
+
+Den skyddade dashboarden kräver en konfigurerad Supabase-instans och ett giltigt
+användarsessionstillstånd. I den nuvarande lokala miljön saknas `.env.local`.
+När `http://localhost:3000/` laddas om skickas den därför till
+`/login?error=configuration`, där appen anger att
+`NEXT_PUBLIC_SUPABASE_URL` och `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` saknas.
+Den nuvarande appen har ingen aktiv demovy eller mockad dashboardväg:
+`lib/demo-tasks.ts` innehåller äldre test-/demo-fixturedata men används inte av
+den skyddade dashboarden. Autentisering eller databaskontroller ska inte
+kringgås för att skapa bilder.
+
+För att senare ta representativa bilder utan att använda riktiga användardata:
+
+1. Använd en separat lokal eller test-Supabase-instans och en syntetisk
+   testanvändare. Konfigurera lokalt de tre variablerna som beskrivs ovan.
+2. Läs igenom den befintliga migreringen och tillämpa den endast i den
+   uttryckligen valda, isolerade testdatabasen. Lokalt kräver Supabase CLI
+   Docker; migreringen tillämpas först när ett separat kommando som
+   `npm.cmd run db:reset` körs. Inget av detta har gjorts här.
+3. Starta appen med `npm.cmd run dev`, logga in med testkontot och skapa
+   syntetiska projekt och uppgifter genom gränssnittet.
+4. Ta en desktopbild av dashboarden, där översikt, projekt och uppgifter visas
+   på samma sida. Använd navigeringens Dashboard-, Projects- och My tasks-länkar
+   för att visa respektive sektion inför bilden.
+5. Öppna webbläsarens responsiva enhetsvy, kontrollera att mobilnavigering och
+   uppgiftskort fungerar, och ta en separat mobilbild.
+6. Granska bilderna för e-postadresser, personuppgifter, tokens och annan
+   känslig information innan du sparar dem i `docs/screenshots/`. Lägg därefter
+   till README-bildreferenser till just de filer som faktiskt finns.
+
+Det skapades inga skärmbilder i denna genomgång. Att skapa dem kräver först en
+separat testmiljö med Supabase-konfiguration och en migrerad testdatabas; ingen
+konfiguration eller migrering har gjorts.
 
 ## Funktioner i koden
 

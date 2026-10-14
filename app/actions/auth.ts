@@ -56,7 +56,7 @@ export async function signIn(
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Check the fields below and try again.",
+      message: "Kontrollera fälten nedan och försök igen.",
       fieldErrors: getFieldErrors(parsed.error.issues),
     };
   }
@@ -66,7 +66,7 @@ export async function signIn(
   if (!supabase) {
     return {
       status: "error",
-      message: "Authentication is not configured. Add the Supabase values to .env.local.",
+      message: "Autentisering är inte konfigurerad. Lägg till Supabase-värdena i .env.local.",
     };
   }
 
@@ -91,7 +91,7 @@ export async function signUp(
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Check the fields below and try again.",
+      message: "Kontrollera fälten nedan och försök igen.",
       fieldErrors: getFieldErrors(parsed.error.issues),
     };
   }
@@ -110,7 +110,7 @@ export async function signUp(
   if (!supabase) {
     return {
       status: "error",
-      message: "Authentication is not configured. Add the Supabase values to .env.local.",
+      message: "Autentisering är inte konfigurerad. Lägg till Supabase-värdena i .env.local.",
     };
   }
 
@@ -119,7 +119,7 @@ export async function signUp(
     return {
       status: "error",
       message:
-        "Registration needs a valid application URL. Check the deployment's authentication URL configuration.",
+        "Registreringen kräver en giltig appadress. Kontrollera autentiseringens URL-konfiguration för driftsmiljön.",
     };
   }
 
@@ -144,7 +144,7 @@ export async function signUp(
 
   return {
     status: "success",
-    message: "Check your email for a confirmation link to finish creating your account.",
+    message: "Kontrollera din e-post för en bekräftelselänk och slutför registreringen.",
   };
 }
 

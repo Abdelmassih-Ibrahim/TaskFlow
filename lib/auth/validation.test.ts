@@ -39,7 +39,7 @@ describe("registration validation", () => {
     if (!result.success) {
       expect(result.error.issues[0]).toMatchObject({
         path: ["confirmPassword"],
-        message: "Passwords do not match.",
+        message: "Lösenorden stämmer inte överens.",
       });
     }
   });

@@ -78,15 +78,15 @@ export function AuthForm({
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_50px_-32px_rgba(15,23,42,0.35)] sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">
-            Your focused workspace
+            En arbetsyta med fokus
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-            {isSignUp ? "Create your account" : "Welcome back"}
+            {isSignUp ? "Skapa ditt konto" : "Välkommen tillbaka"}
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-500">
             {isSignUp
-              ? "Sign up to continue to TaskFlow."
-              : "Sign in to continue to your TaskFlow workspace."}
+              ? "Registrera dig för att komma igång med TaskFlow."
+              : "Logga in för att fortsätta till din arbetsyta i TaskFlow."}
           </p>
 
           <div className="mt-6">
@@ -103,7 +103,7 @@ export function AuthForm({
                 htmlFor="email"
                 className="block text-sm font-medium text-slate-800"
               >
-                Email address
+                E-postadress
               </label>
               <input
                 id="email"
@@ -129,7 +129,7 @@ export function AuthForm({
                 htmlFor="password"
                 className="block text-sm font-medium text-slate-800"
               >
-                Password
+                Lösenord
               </label>
               <input
                 id="password"
@@ -158,7 +158,7 @@ export function AuthForm({
                   htmlFor="confirmPassword"
                   className="block text-sm font-medium text-slate-800"
                 >
-                  Confirm password
+                  Bekräfta lösenord
                 </label>
                 <input
                   id="confirmPassword"
@@ -195,11 +195,11 @@ export function AuthForm({
               {pending ? (
                 <>
                   <LoaderCircle size={16} aria-hidden="true" className="animate-spin" />
-                  {isSignUp ? "Creating account..." : "Signing in..."}
+                  {isSignUp ? "Skapar konto..." : "Loggar in..."}
                 </>
               ) : (
                 <>
-                  {isSignUp ? "Create account" : "Sign in"}
+                  {isSignUp ? "Skapa konto" : "Logga in"}
                   <ArrowRight size={16} aria-hidden="true" />
                 </>
               )}
@@ -207,18 +207,18 @@ export function AuthForm({
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-600">
-            {isSignUp ? "Already have an account?" : "New to TaskFlow?"}{" "}
+            {isSignUp ? "Har du redan ett konto?" : "Ny på TaskFlow?"}{" "}
             <Link
               href={isSignUp ? "/login" : "/register"}
               className="font-semibold text-teal-800 underline decoration-teal-300 underline-offset-4 hover:text-teal-950"
             >
-              {isSignUp ? "Sign in" : "Create an account"}
+              {isSignUp ? "Logga in" : "Skapa ett konto"}
             </Link>
           </p>
         </section>
         <p className="mt-5 text-center text-xs leading-5 text-slate-500">
-          TaskFlow uses Supabase Auth to manage your sign-in session. Your
-          password is never stored by this application.
+          TaskFlow använder Supabase Auth för att hantera din inloggning. Ditt
+          lösenord lagras aldrig av den här applikationen.
         </p>
       </div>
     </main>

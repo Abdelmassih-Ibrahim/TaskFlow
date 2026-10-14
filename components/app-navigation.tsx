@@ -24,14 +24,14 @@ async function submitSignOut(): Promise<null> {
 }
 
 const primaryNavigation = [
-  { label: "Dashboard", href: "#dashboard", icon: LayoutDashboard, active: true },
-  { label: "My tasks", href: "#task-overview", icon: CheckSquare2, active: false },
-  { label: "Projects", href: "#projects", icon: FolderKanban, active: false },
+  { label: "Översikt", href: "#dashboard", icon: LayoutDashboard, active: true },
+  { label: "Mina uppgifter", href: "#task-overview", icon: CheckSquare2, active: false },
+  { label: "Projekt", href: "#projects", icon: FolderKanban, active: false },
 ];
 
 const unavailableNavigation = [
-  { label: "Calendar", icon: CalendarDays },
-  { label: "Reports", icon: BarChart3 },
+  { label: "Kalender", icon: CalendarDays },
+  { label: "Rapporter", icon: BarChart3 },
 ];
 
 function SidebarContent({
@@ -64,15 +64,15 @@ function SidebarContent({
               {email}
             </p>
             <p className="mt-0.5 text-[11px] text-slate-400">
-              Personal workspace
+              Personlig arbetsyta
             </p>
           </div>
         </div>
       </div>
 
-      <nav aria-label="Main navigation" className="flex-1 px-3">
+      <nav aria-label="Huvudnavigering" className="flex-1 px-3">
         <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-          Workspace
+          Arbetsyta
         </p>
         <ul className="space-y-1">
           {primaryNavigation.map(({ label, href, icon: Icon, active }) => (
@@ -99,20 +99,20 @@ function SidebarContent({
         </ul>
 
         <p className="mb-2 mt-8 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-          Organize
+          Organisera
         </p>
         <ul className="space-y-1">
           {unavailableNavigation.map(({ label, icon: Icon }) => (
             <li key={label}>
               <span
                 aria-disabled="true"
-                title={`${label} is not available yet`}
+                title={`${label} är inte tillgängligt ännu`}
                 className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-slate-500"
               >
                 <Icon size={17} aria-hidden="true" className="text-slate-600" />
                 {label}
                 <span className="ml-auto text-[9px] font-semibold uppercase tracking-wide text-slate-600">
-                  Soon
+                  Snart
                 </span>
               </span>
             </li>
@@ -123,19 +123,19 @@ function SidebarContent({
       <div className="space-y-1 border-t border-white/[0.08] px-3 py-4">
         <span
           aria-disabled="true"
-          title="Settings are not available in this demo"
+          title="Inställningar är inte tillgängliga ännu"
           className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-slate-500"
         >
           <Settings2 size={16} aria-hidden="true" className="text-slate-600" />
-          Settings
+          Inställningar
         </span>
         <span
           aria-disabled="true"
-          title="Help is not available yet"
+          title="Hjälp är inte tillgänglig ännu"
           className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-slate-500"
         >
           <CircleHelp size={16} aria-hidden="true" className="text-slate-600" />
-          Help &amp; support
+          Hjälp och support
         </span>
         <div className="mt-3 flex items-center gap-3 border-t border-white/[0.08] px-3 pt-4">
           <span className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-200 to-orange-300 text-[11px] font-bold text-orange-950">
@@ -143,7 +143,7 @@ function SidebarContent({
           </span>
           <div className="min-w-0">
             <p className="truncate text-xs font-medium text-slate-200">{email}</p>
-            <p className="truncate text-[10px] text-slate-500">Signed in</p>
+            <p className="truncate text-[10px] text-slate-500">Inloggad</p>
           </div>
         </div>
         <form action={signOutAction} className="mt-2">
@@ -154,7 +154,7 @@ function SidebarContent({
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white disabled:cursor-wait disabled:opacity-60"
           >
             <LogOut size={16} aria-hidden="true" className="text-slate-500" />
-            {signingOut ? "Signing out..." : "Sign out"}
+            {signingOut ? "Loggar ut..." : "Logga ut"}
           </button>
         </form>
       </div>
@@ -214,7 +214,7 @@ export function AppNavigation({ email }: { email: string }) {
         <SidebarContent email={email} />
         <div className="mx-4 mb-4 flex items-center gap-2 rounded-lg bg-teal-400/[0.08] px-3 py-2.5 text-[11px] text-teal-100/80">
           <Sparkles size={14} aria-hidden="true" className="text-teal-300" />
-          A calm space for focused work
+          En lugn plats för fokuserat arbete
         </div>
       </aside>
 
@@ -223,7 +223,7 @@ export function AppNavigation({ email }: { email: string }) {
           ref={menuButtonRef}
           type="button"
           onClick={() => setMobileOpen(true)}
-          aria-label="Open navigation menu"
+          aria-label="Öppna navigeringsmenyn"
           aria-expanded={mobileOpen}
           aria-controls="mobile-navigation"
           className="inline-flex size-10 items-center justify-center rounded-lg text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-offset-2"
@@ -246,7 +246,7 @@ export function AppNavigation({ email }: { email: string }) {
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
-            aria-label="Close navigation menu"
+            aria-label="Stäng navigeringsmenyn"
             onClick={closeMobileNavigation}
             className="absolute inset-0 cursor-default bg-slate-950/50"
           />
@@ -255,14 +255,14 @@ export function AppNavigation({ email }: { email: string }) {
             ref={mobileNavigationRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Mobile navigation"
+            aria-label="Mobilnavigering"
             className="absolute inset-y-0 left-0 flex w-[min(300px,86vw)] flex-col bg-[#111827] shadow-2xl"
           >
             <div className="absolute right-3 top-5 z-10">
               <button
                 type="button"
                 onClick={closeMobileNavigation}
-                aria-label="Close navigation menu"
+                aria-label="Stäng navigeringsmenyn"
                 className="inline-flex size-9 items-center justify-center rounded-lg text-slate-300 hover:bg-white/10 hover:text-white"
               >
                 <X size={19} aria-hidden="true" />
@@ -271,7 +271,7 @@ export function AppNavigation({ email }: { email: string }) {
             <SidebarContent email={email} onNavigate={closeMobileNavigation} />
             <div className="mx-4 mb-4 flex items-center gap-2 rounded-lg bg-teal-400/[0.08] px-3 py-2.5 text-[11px] text-teal-100/80">
               <Sparkles size={14} aria-hidden="true" className="text-teal-300" />
-              A calm space for focused work
+              En lugn plats för fokuserat arbete
             </div>
           </aside>
         </div>

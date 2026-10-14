@@ -133,14 +133,14 @@ function DialogActions({
         disabled={pending}
         className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
       >
-        Cancel
+        Avbryt
       </button>
       <button
         type="submit"
         disabled={pending}
         className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-wait disabled:opacity-60"
       >
-        {pending ? "Saving..." : submitLabel}
+        {pending ? "Sparar..." : submitLabel}
       </button>
     </div>
   );
@@ -167,8 +167,8 @@ export function ProjectDialog({
 
   return (
     <WorkspaceDialog
-      title={project ? "Edit project" : "Create a project"}
-      description="Projects keep related tasks organized in one place."
+      title={project ? "Redigera projekt" : "Skapa ett projekt"}
+      description="Samla relaterade uppgifter på ett och samma ställe."
       busy={pending}
       onClose={onClose}
     >
@@ -178,7 +178,7 @@ export function ProjectDialog({
           <Feedback state={state} />
           <div>
             <label htmlFor="project-name" className={labelClassName}>
-              Project name
+              Projektnamn
             </label>
             <input
               id="project-name"
@@ -195,7 +195,7 @@ export function ProjectDialog({
           </div>
           <div>
             <label htmlFor="project-description" className={labelClassName}>
-              Description <span className="font-normal text-slate-400">Optional</span>
+              Beskrivning <span className="font-normal text-slate-400">Valfritt</span>
             </label>
             <textarea
               id="project-description"
@@ -217,7 +217,7 @@ export function ProjectDialog({
         </div>
         <DialogActions
           pending={pending}
-          submitLabel={project ? "Save changes" : "Create project"}
+          submitLabel={project ? "Spara ändringar" : "Skapa projekt"}
           onClose={onClose}
         />
       </form>
@@ -248,8 +248,8 @@ export function TaskDialog({
 
   return (
     <WorkspaceDialog
-      title={task ? "Edit task" : "Create a task"}
-      description="Add the details and choose the project this task belongs to."
+      title={task ? "Redigera uppgift" : "Skapa en uppgift"}
+      description="Fyll i uppgiften och välj vilket projekt den tillhör."
       busy={pending}
       onClose={onClose}
     >
@@ -259,7 +259,7 @@ export function TaskDialog({
           <Feedback state={state} />
           <div>
             <label htmlFor="task-title" className={labelClassName}>
-              Task title
+              Uppgiftstitel
             </label>
             <input
               id="task-title"
@@ -276,7 +276,7 @@ export function TaskDialog({
           </div>
           <div>
             <label htmlFor="task-description" className={labelClassName}>
-              Description <span className="font-normal text-slate-400">Optional</span>
+              Beskrivning <span className="font-normal text-slate-400">Valfritt</span>
             </label>
             <textarea
               id="task-description"
@@ -297,7 +297,7 @@ export function TaskDialog({
           </div>
           <div>
             <label htmlFor="task-project" className={labelClassName}>
-              Project
+              Projekt
             </label>
             <select
               id="task-project"
@@ -331,15 +331,15 @@ export function TaskDialog({
                 aria-describedby={errors.status ? "task-status-error" : undefined}
                 className={inputClassName}
               >
-                <option value="todo">To do</option>
-                <option value="in_progress">In progress</option>
-                <option value="done">Done</option>
+                <option value="todo">Att göra</option>
+                <option value="in_progress">Pågår</option>
+                <option value="done">Klar</option>
               </select>
               <FieldError id="task-status-error" message={errors.status} />
             </div>
             <div>
               <label htmlFor="task-priority" className={labelClassName}>
-                Priority
+                Prioritet
               </label>
               <select
                 id="task-priority"
@@ -351,15 +351,15 @@ export function TaskDialog({
                 }
                 className={inputClassName}
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="low">Låg</option>
+                <option value="medium">Medel</option>
+                <option value="high">Hög</option>
               </select>
               <FieldError id="task-priority-error" message={errors.priority} />
             </div>
             <div>
               <label htmlFor="task-due-date" className={labelClassName}>
-                Due date
+                Förfallodatum
               </label>
               <input
                 id="task-due-date"
@@ -378,7 +378,7 @@ export function TaskDialog({
         </div>
         <DialogActions
           pending={pending}
-          submitLabel={task ? "Save changes" : "Create task"}
+          submitLabel={task ? "Spara ändringar" : "Skapa uppgift"}
           onClose={onClose}
         />
       </form>
@@ -424,7 +424,7 @@ export function DeleteRecordButton({
         aria-label={ariaLabel}
         className="rounded-md px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50"
       >
-        {pending ? "Deleting..." : label}
+        {pending ? "Tar bort..." : label}
       </button>
       {state.status !== "idle" && (
         <span

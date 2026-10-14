@@ -55,7 +55,7 @@ function validationFailure(
 ): WorkspaceActionState {
   return {
     status: "error",
-    message: "Check the fields below and try again.",
+    message: "Kontrollera fälten nedan och försök igen.",
     fieldErrors: getIssueErrors(issues),
   };
 }
@@ -118,7 +118,7 @@ export async function createProject(
   if (!parsed.success) return validationFailure(parsed.error.issues);
 
   const context = await getAuthenticatedClient();
-  if (!context) return actionError("Your session has expired. Sign in again.");
+  if (!context) return actionError("Din session har gått ut. Logga in igen.");
 
   const { error } = await context.supabase.from("projects").insert({
     owner_id: context.user.id,
@@ -127,10 +127,10 @@ export async function createProject(
   });
 
   if (error) {
-    return actionError("We couldn't create this project. Please try again.");
+    return actionError("Det gick inte att skapa projektet. Försök igen.");
   }
 
-  return actionSuccess("Project created.");
+  return actionSuccess("Projektet har skapats.");
 }
 
 export async function updateProject(
@@ -145,14 +145,14 @@ export async function updateProject(
   if (!parsed.success) return validationFailure(parsed.error.issues);
 
   const context = await getAuthenticatedClient();
-  if (!context) return actionError("Your session has expired. Sign in again.");
+  if (!context) return actionError("Din session har gått ut. Logga in igen.");
 
   const isOwner = await findOwnedProject(
     context.supabase,
     parsed.data.id,
     context.user.id,
   );
-  if (!isOwner) return actionError("That project is unavailable.");
+  if (!isOwner) return actionError("Projektet är inte tillgängligt.");
 
   const { data, error } = await context.supabase
     .from("projects")
@@ -166,10 +166,10 @@ export async function updateProject(
     .maybeSingle();
 
   if (error || !data) {
-    return actionError("We couldn't update this project. Please try again.");
+    return actionError("Det gick inte att uppdatera projektet. Försök igen.");
   }
 
-  return actionSuccess("Project updated.");
+  return actionSuccess("Projektet har uppdaterats.");
 }
 
 export async function deleteProject(
@@ -182,14 +182,14 @@ export async function deleteProject(
   if (!parsed.success) return validationFailure(parsed.error.issues);
 
   const context = await getAuthenticatedClient();
-  if (!context) return actionError("Your session has expired. Sign in again.");
+  if (!context) return actionError("Din session har gått ut. Logga in igen.");
 
   const isOwner = await findOwnedProject(
     context.supabase,
     parsed.data.id,
     context.user.id,
   );
-  if (!isOwner) return actionError("That project is unavailable.");
+  if (!isOwner) return actionError("Projektet är inte tillgängligt.");
 
   const { data, error } = await context.supabase
     .from("projects")
@@ -200,11 +200,11 @@ export async function deleteProject(
     .maybeSingle();
 
   if (error || !data) {
-    return actionError("We couldn't delete this project. Please try again.");
+    return actionError("Det gick inte att ta bort projektet. Försök igen.");
   }
 
   return actionSuccess(
-    "Project and its tasks were deleted.",
+    "Projektet och dess uppgifter har tagits bort.",
   );
 }
 
@@ -223,7 +223,7 @@ export async function createTask(
   if (!parsed.success) return validationFailure(parsed.error.issues);
 
   const context = await getAuthenticatedClient();
-  if (!context) return actionError("Your session has expired. Sign in again.");
+  if (!context) return actionError("Din session har gått ut. Logga in igen.");
 
   const isOwner = await findOwnedProject(
     context.supabase,
@@ -231,7 +231,7 @@ export async function createTask(
     context.user.id,
   );
   if (!isOwner) {
-    return actionError("Choose a project in your workspace.");
+    return actionError("Välj ett projekt i din arbetsyta.");
   }
 
   const { error } = await context.supabase.from("tasks").insert({
@@ -244,10 +244,10 @@ export async function createTask(
   });
 
   if (error) {
-    return actionError("We couldn't create this task. Please try again.");
+    return actionError("Det gick inte att skapa uppgiften. Försök igen.");
   }
 
-  return actionSuccess("Task created.");
+  return actionSuccess("Uppgiften har skapats.");
 }
 
 export async function updateTask(
@@ -266,10 +266,10 @@ export async function updateTask(
   if (!parsed.success) return validationFailure(parsed.error.issues);
 
   const context = await getAuthenticatedClient();
-  if (!context) return actionError("Your session has expired. Sign in again.");
+  if (!context) return actionError("Din session har gått ut. Logga in igen.");
 
   const existingTask = await findOwnedTask(context.supabase, parsed.data.id);
-  if (!existingTask) return actionError("That task is unavailable.");
+  if (!existingTask) return actionError("Uppgiften är inte tillgänglig.");
 
   const isOwner = await findOwnedProject(
     context.supabase,
@@ -277,7 +277,7 @@ export async function updateTask(
     context.user.id,
   );
   if (!isOwner) {
-    return actionError("Choose a project in your workspace.");
+    return actionError("Välj ett projekt i din arbetsyta.");
   }
 
   const { data, error } = await context.supabase
@@ -295,10 +295,10 @@ export async function updateTask(
     .maybeSingle();
 
   if (error || !data) {
-    return actionError("We couldn't update this task. Please try again.");
+    return actionError("Det gick inte att uppdatera uppgiften. Försök igen.");
   }
 
-  return actionSuccess("Task updated.");
+  return actionSuccess("Uppgiften har uppdaterats.");
 }
 
 export async function deleteTask(
@@ -311,17 +311,17 @@ export async function deleteTask(
   if (!parsed.success) return validationFailure(parsed.error.issues);
 
   const context = await getAuthenticatedClient();
-  if (!context) return actionError("Your session has expired. Sign in again.");
+  if (!context) return actionError("Din session har gått ut. Logga in igen.");
 
   const existingTask = await findOwnedTask(context.supabase, parsed.data.id);
-  if (!existingTask) return actionError("That task is unavailable.");
+  if (!existingTask) return actionError("Uppgiften är inte tillgänglig.");
 
   const isOwner = await findOwnedProject(
     context.supabase,
     existingTask.project_id,
     context.user.id,
   );
-  if (!isOwner) return actionError("That task is unavailable.");
+  if (!isOwner) return actionError("Uppgiften är inte tillgänglig.");
 
   const { data, error } = await context.supabase
     .from("tasks")
@@ -331,8 +331,8 @@ export async function deleteTask(
     .maybeSingle();
 
   if (error || !data) {
-    return actionError("We couldn't delete this task. Please try again.");
+    return actionError("Det gick inte att ta bort uppgiften. Försök igen.");
   }
 
-  return actionSuccess("Task deleted.");
+  return actionSuccess("Uppgiften har tagits bort.");
 }

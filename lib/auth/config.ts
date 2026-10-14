@@ -30,11 +30,11 @@ export function getAuthSetupMessage({
   registration?: boolean;
 } = {}): string | null {
   if (!getSupabaseConfig()) {
-    return "Add your Supabase project URL and publishable key to .env.local before using authentication.";
+    return "Lägg till Supabase-projektets URL och publishable key i .env.local innan du använder autentiseringen.";
   }
 
   if (registration && !getAuthSiteUrl()) {
-    return "Registration needs a valid application URL. Configure NEXT_PUBLIC_SITE_URL, or enable Vercel system environment variables for Preview deployments.";
+    return "Registreringen kräver en giltig appadress. Ange NEXT_PUBLIC_SITE_URL eller aktivera Vercels systemvariabler för Preview-driftsättningar.";
   }
 
   return null;
