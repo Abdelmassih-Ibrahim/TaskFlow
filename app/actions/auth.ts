@@ -35,10 +35,15 @@ function getFieldErrors(
 }
 
 function readFormData(formData: FormData) {
+  const readString = (name: string) => {
+    const value = formData.get(name);
+    return typeof value === "string" ? value : "";
+  };
+
   return {
-    email: formData.get("email"),
-    password: formData.get("password"),
-    confirmPassword: formData.get("confirmPassword"),
+    email: readString("email"),
+    password: readString("password"),
+    confirmPassword: readString("confirmPassword"),
   };
 }
 
