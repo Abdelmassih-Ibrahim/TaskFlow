@@ -134,9 +134,21 @@ describe("workspace dashboard", () => {
   });
 
   it("displays the sign-out failure notice returned by the server action", () => {
-    render(<WorkspaceDashboard {...workspace} signOutError />);
+    const { rerender } = render(
+      <WorkspaceDashboard {...workspace} signOutError />,
+    );
 
-    expect(screen.getByRole("status")).toHaveTextContent(
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "We couldn't sign you out. Please try again.",
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Dismiss sign-out error" }),
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    rerender(<WorkspaceDashboard {...workspace} signOutError={false} />);
+    rerender(<WorkspaceDashboard {...workspace} signOutError />);
+    expect(screen.getByRole("alert")).toHaveTextContent(
       "We couldn't sign you out. Please try again.",
     );
   });

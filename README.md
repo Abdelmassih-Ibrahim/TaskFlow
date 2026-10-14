@@ -36,7 +36,7 @@ TaskFlow is a project and task management app built with Next.js, Supabase Auth,
 From the repository root:
 
 ```powershell
-npm.cmd install
+npm.cmd ci
 npm.cmd run db:start
 ```
 
@@ -70,6 +70,7 @@ npm.cmd run db:reset   # Recreate the local database from migrations
 npm.cmd run db:lint    # Check the local database schema
 npm.cmd run db:test    # Run pgTAP schema and RLS tests
 npm.cmd run db:stop    # Stop the local Supabase stack
+npm.cmd audit          # Check installed packages for known vulnerabilities
 ```
 
 The Supabase CLI is pinned as a project development dependency and is available after `npm.cmd install`. Start Docker Desktop before running database commands. The first `db:start` downloads local service images.
@@ -118,6 +119,22 @@ Local schema development and testing do not require a hosted Supabase project or
 
 The application uses `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL` from an ignored local `.env.local` file. These contain the public project URL, publishable key, and app origin; never put a service-role/secret key in a `NEXT_PUBLIC_` variable or browser code.
 
+## Vercel and Supabase deployment checklist
+
+Deployment is not configured or verified yet. Before deploying:
+
+1. **Prepare Supabase.** Create or select the intended hosted project, enable the Email provider, and review the existing migration in `supabase/migrations/`. Apply it to that project through your approved database workflow before expecting project/task features to work. No migration has been applied or pushed as part of this work.
+2. **Configure Vercel.** Import the repository as a Next.js project and use the standard `npm run build` command. Select a Node.js version supported by Vercel and Next.js 16 (Node.js 20.9 or later). Add all three variables from `.env.example` in Vercel Project Settings → Environment Variables:
+   - `NEXT_PUBLIC_SUPABASE_URL` — the hosted Supabase project URL.
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — the project's publishable key only; never use a secret/service-role key.
+   - `NEXT_PUBLIC_SITE_URL` — the production app origin, including `https://` and no path, for example `https://<your-production-domain>`. Local development uses `http://localhost:3000`. These `NEXT_PUBLIC_` values are public and are made available to the application build; do not put secrets in them.
+   - Vercel's `VERCEL_URL` and `VERCEL_ENV` system variables are used for Preview confirmation links. Enable access to Vercel system environment variables for the deployment; no value for these variables should be added to `.env.example`.
+3. **Configure Supabase Auth URLs.** In Supabase Authentication → URL Configuration, set **Site URL** to the production app origin and add `https://<your-production-domain>/auth/callback` to **Redirect URLs**. Add `http://localhost:3000/auth/callback` for local development. For Vercel Preview deployments, the app builds the confirmation callback origin from that deployment's `VERCEL_URL`, so allow the resulting preview callback URLs using a narrowly scoped Supabase wildcard pattern. Do not use an unnecessarily broad redirect pattern.
+4. **Verify the deployed app manually.** Test registration (including the email confirmation link if enabled), sign-in, sign-out, protected routes, and project/task reads and mutations. Verify cross-user isolation against the hosted project's RLS policies using separate test accounts and non-production data. Local unit tests and a successful build do not prove these hosted behaviors.
+5. **Review the release.** Confirm the production domain, environment-variable assignments, callback allowlist, migration state, and Vercel build output before sharing the deployment.
+
+The callback handler exchanges the one-time Supabase code at `/auth/callback`; registration uses `NEXT_PUBLIC_SITE_URL` in local and production environments and the current deployment's `VERCEL_URL` in Vercel Preview. Supabase's Site URL is the default redirect, while the callback must also be allowed by its Redirect URLs list. See the [Next.js deployment guide](https://nextjs.org/docs/app/getting-started/deploying), [Vercel's Next.js guide](https://vercel.com/docs/frameworks/full-stack/nextjs), [Vercel system environment variables](https://vercel.com/docs/environment-variables/system-environment-variables), and [Supabase redirect URL guide](https://supabase.com/docs/guides/auth/redirect-urls).
+
 ## Current functionality
 
 - Responsive TaskFlow dashboard shell with desktop sidebar and mobile navigation.
@@ -136,9 +153,9 @@ The application uses `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHAB
 
 - Password reset, OAuth, multi-factor authentication, and account management.
 - Working calendar, reports, settings, or team collaboration.
-- Automated browser end-to-end tests, CI, and deployment configuration.
+- Automated browser end-to-end tests, CI, and a deployed/verified production environment.
 
-The schema and RLS rules are defined and covered by local pgTAP tests. The application tests mock Supabase and do not prove live database authorization or connectivity. Configure a Supabase project and apply the migration before relying on persisted data. Live authentication and database operations remain unverified until tested against a configured project. No remote database migrations or deployment have been performed.
+The schema and RLS rules are defined and covered by local pgTAP tests. The application tests mock Supabase and do not prove live database authorization or connectivity. Configure a Supabase project and apply the migration before relying on persisted data. Live authentication and database operations remain unverified until tested against a configured project. This repository has not been deployed, and no remote database migration has been performed.
 
 ## Technology
 

@@ -119,7 +119,7 @@ export async function signUp(
     return {
       status: "error",
       message:
-        "Registration needs a valid NEXT_PUBLIC_SITE_URL in .env.local to configure the confirmation link.",
+        "Registration needs a valid application URL. Check the deployment's authentication URL configuration.",
     };
   }
 

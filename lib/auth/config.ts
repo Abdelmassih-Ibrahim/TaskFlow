@@ -2,7 +2,13 @@ import { z } from "zod";
 import { getSupabaseConfig } from "../supabase/shared";
 
 export function getAuthSiteUrl(): string | null {
-  const parsed = z.string().url().safeParse(process.env.NEXT_PUBLIC_SITE_URL);
+  const isVercelPreview = process.env.VERCEL_ENV === "preview";
+  const configuredSiteUrl = isVercelPreview
+    ? process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : undefined
+    : process.env.NEXT_PUBLIC_SITE_URL;
+  const parsed = z.string().url().safeParse(configuredSiteUrl);
   if (!parsed.success) return null;
 
   const siteUrl = new URL(parsed.data);
@@ -28,7 +34,7 @@ export function getAuthSetupMessage({
   }
 
   if (registration && !getAuthSiteUrl()) {
-    return "Registration needs a valid NEXT_PUBLIC_SITE_URL in .env.local to configure the confirmation link.";
+    return "Registration needs a valid application URL. Configure NEXT_PUBLIC_SITE_URL, or enable Vercel system environment variables for Preview deployments.";
   }
 
   return null;

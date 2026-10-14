@@ -38,6 +38,29 @@ type ActiveDialog =
   | { type: "task"; task: TaskWithProject | null }
   | null;
 
+function SignOutFailureNotice() {
+  const [dismissed, setDismissed] = useState(false);
+
+  if (dismissed) return null;
+
+  return (
+    <div
+      role="alert"
+      className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
+    >
+      <span>We couldn't sign you out. Please try again.</span>
+      <button
+        type="button"
+        onClick={() => setDismissed(true)}
+        aria-label="Dismiss sign-out error"
+        className="rounded p-1 text-rose-800 hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-700"
+      >
+        <X size={16} aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
+
 const taskSortOptions = ["due_date", "title", "priority", "status"] as const;
 type TaskSort = (typeof taskSortOptions)[number];
 
@@ -53,9 +76,7 @@ export function WorkspaceDashboard({
   const [priority, setPriority] = useState<TaskPriority | "all">("all");
   const [projectId, setProjectId] = useState("");
   const [sort, setSort] = useState<TaskSort>("due_date");
-  const [notice, setNotice] = useState<string | null>(() =>
-    signOutError ? "We couldn't sign you out. Please try again." : null,
-  );
+  const [notice, setNotice] = useState<string | null>(null);
   const dialogTriggerRef = useRef<HTMLElement | null>(null);
   const openDialog = useCallback(
     (dialog: Exclude<ActiveDialog, null>, trigger: HTMLElement) => {
@@ -74,12 +95,6 @@ export function WorkspaceDashboard({
     dialogTriggerRef.current?.focus();
     dialogTriggerRef.current = null;
   }, [activeDialog]);
-
-  useEffect(() => {
-    if (signOutError) {
-      setNotice("We couldn't sign you out. Please try again.");
-    }
-  }, [signOutError]);
 
   const summary = useMemo(() => getWorkspaceSummary(tasks), [tasks]);
   const filteredTasks = useMemo(
@@ -127,7 +142,8 @@ export function WorkspaceDashboard({
         className="min-w-0 flex-1 px-5 pb-12 pt-7 sm:px-8 lg:ml-[248px] lg:px-10 lg:pt-10"
       >
         <div className="mx-auto max-w-[1320px]">
-          {notice && (
+          {signOutError && <SignOutFailureNotice />}
+          {!signOutError && notice && (
             <div
               role="status"
               aria-live="polite"
