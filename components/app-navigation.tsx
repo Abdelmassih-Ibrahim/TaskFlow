@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const primaryNavigation = [
   { label: "Dashboard", href: "#dashboard", icon: LayoutDashboard, active: true },
@@ -171,6 +171,49 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function AppNavigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileNavigationRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const navigation = mobileNavigationRef.current;
+    const focusableElements = navigation?.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+    );
+    const firstElement = focusableElements?.item(0);
+    const lastElement = focusableElements?.item(
+      (focusableElements.length ?? 1) - 1,
+    );
+
+    firstElement?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        menuButtonRef.current?.focus();
+        return;
+      }
+
+      if (event.key !== "Tab" || !firstElement || !lastElement) return;
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileOpen]);
+
+  function closeMobileNavigation() {
+    setMobileOpen(false);
+    menuButtonRef.current?.focus();
+  }
 
   return (
     <>
@@ -184,6 +227,7 @@ export function AppNavigation() {
 
       <div className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur lg:hidden">
         <button
+          ref={menuButtonRef}
           type="button"
           onClick={() => setMobileOpen(true)}
           aria-label="Open navigation menu"
@@ -210,25 +254,28 @@ export function AppNavigation() {
           <button
             type="button"
             aria-label="Close navigation menu"
-            onClick={() => setMobileOpen(false)}
+            onClick={closeMobileNavigation}
             className="absolute inset-0 cursor-default bg-slate-950/50"
           />
           <aside
             id="mobile-navigation"
+            ref={mobileNavigationRef}
+            role="dialog"
+            aria-modal="true"
             aria-label="Mobile navigation"
             className="absolute inset-y-0 left-0 flex w-[min(300px,86vw)] flex-col bg-[#111827] shadow-2xl"
           >
             <div className="absolute right-3 top-5 z-10">
               <button
                 type="button"
-                onClick={() => setMobileOpen(false)}
+                onClick={closeMobileNavigation}
                 aria-label="Close navigation menu"
                 className="inline-flex size-9 items-center justify-center rounded-lg text-slate-300 hover:bg-white/10 hover:text-white"
               >
                 <X size={19} aria-hidden="true" />
               </button>
             </div>
-            <SidebarContent onNavigate={() => setMobileOpen(false)} />
+            <SidebarContent onNavigate={closeMobileNavigation} />
             <div className="mx-4 mb-4 flex items-center gap-2 rounded-lg bg-teal-400/[0.08] px-3 py-2.5 text-[11px] text-teal-100/80">
               <Sparkles size={14} aria-hidden="true" className="text-teal-300" />
               A calm space for focused work
