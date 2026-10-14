@@ -1,169 +1,307 @@
 # TaskFlow
 
-TaskFlow is a project and task management app built with Next.js, Supabase Auth, and Supabase PostgreSQL. Signed-in users can manage their own projects and tasks through a responsive dashboard.
+TaskFlow är en projekt- och uppgiftshanterare byggd med Next.js App Router,
+TypeScript, Tailwind CSS och Supabase. Projektet visar ett sammanhängande
+arbetsflöde för att organisera projekt och uppgifter, med autentiseringssidor,
+filtrering, sammanfattningar och en responsiv dashboard.
 
-> **Database setup required:** Project and task data is read from and written to the configured Supabase database. Apply the included migration to your local or hosted database before using these features. Live database behavior has not been verified against a hosted project in this repository.
+> **Status:** Funktionerna är implementerade i koden och verifierade med
+> automatiska kontroller där det anges nedan. Supabase Auth,
+> databasoperationer och Row Level Security (RLS) har inte verifierats mot en
+> ansluten Supabase-miljö. Ingen fjärrmigrering har tillämpats och appen har
+> inte publicerats.
 
-## Screenshots
+## Skärmbilder
 
-> Screenshot placeholder: add genuine desktop and mobile screenshots after setting up a local Supabase project. No screenshots are included yet.
+Skärmbilder har inte lagts till ännu. Lägg till autentiska bilder från appen
+efter att en lokal miljö har konfigurerats och använd tydliga desktop- och
+mobilvyer. Inga demo- eller produktionsbilder påstås finnas i repot.
 
-## Features
+## Funktioner i koden
 
-- Email registration, sign-in, sign-out, and protected dashboard routes.
-- Create, edit, and delete projects and tasks with server-side validation.
-- Search tasks and filter by project, status, or priority; sort by due date, title, status, or priority.
-- Task summaries for total, completed, and overdue work, plus per-project completion progress.
-- Responsive sidebar/mobile navigation, accessible forms and dialogs, loading and empty states, and mutation feedback.
+- E-postregistrering, inloggning, utloggning och skyddad dashboard.
+- Skapa, redigera och radera projekt och uppgifter.
+- Uppgiftsnamn, beskrivning, status, prioritet, förfallodatum och
+  projektkoppling.
+- Sökning, filtrering efter projekt/status/prioritet och sortering av
+  uppgiftslistan.
+- Dashboard-sammanfattningar för totalt antal, färdiga och försenade uppgifter,
+  samt projektens beräknade förlopp.
+- Responsiv navigering och gränssnitt för desktop och mobil, formulär,
+  bekräftelser, väntelägen, tomma lägen och felmeddelanden.
+- Zod-validering i autentiserings- och projekt-/uppgiftsflöden.
 
-## Architecture
+Att funktionerna finns i koden innebär inte att de har verifierats mot en
+ansluten Supabase-tjänst. Kalender, rapporter, inställningar och hjälp är
+inaktiva navigationsplatser, inte färdiga funktioner.
 
-- `app/` contains App Router pages, route loading UI, and server actions.
-- `components/` contains the responsive dashboard, navigation, and forms.
-- `lib/workspace/` contains database-backed workspace reads, validation, types, and dashboard calculations.
-- `lib/supabase/` contains the typed server client; requests use the signed-in user's session.
-- `supabase/migrations/` and `supabase/tests/` contain the schema, RLS policies, and local pgTAP checks.
+## Teknikstack
 
-## Prerequisites
+- **Next.js 16.4.1** med App Router och React 19.
+- **TypeScript** med strikt typkontroll.
+- **Tailwind CSS 4** för gränssnittsstilar.
+- **Supabase Auth** med `@supabase/ssr` och Supabase PostgreSQL.
+- **Zod** för indatavalidering.
+- **Lucide** för ikoner.
+- **Vitest**, React Testing Library och jsdom för automatiska tester.
+- **Supabase CLI** och pgTAP-test för lokal databasutveckling.
 
-- A currently supported Node.js LTS release. Next.js 16 requires Node.js 20.9 or later; Node.js 26.7.0 was used for this milestone.
-- npm, included with Node.js.
-- Docker Desktop, running, for the local Supabase database and RLS tests.
-- A Supabase project (hosted or local) and its URL and publishable key to use authentication.
+## Arkitektur i korthet
 
-## Run locally
+- `app/` innehåller App Router-sidor, autentiseringscallback, skyddat
+  route group, laddningsvy och server actions.
+- `components/` innehåller navigering, formulär och dashboardens
+  gränssnittskomponenter.
+- `lib/auth/` innehåller validering, konfiguration och säkra
+  autentiseringsmeddelanden.
+- `lib/supabase/` innehåller typer och serverklient. Appens databasfrågor görs
+  med den inloggade användarens session.
+- `lib/workspace/` innehåller validering, dataläsning och dashboardberäkningar
+  för projekt och uppgifter.
+- `supabase/migrations/` innehåller den versionshanterade schemamigreringen.
+- `supabase/tests/` innehåller pgTAP-tester för schema och RLS-policyer.
+- `PRIVACY-POLICY-DRAFT-SV.md` är ett svenskt integritetspolicyutkast som
+  behöver kompletteras och granskas före publicering.
 
-From the repository root:
+## Förutsättningar
+
+- Node.js 20.9 eller senare, vilket är versionskravet för Next.js 16. Använd en
+  version som fortfarande stöds för ny utveckling och drift.
+- npm.
+- En Supabase-instans för att använda autentisering och databasfunktionerna.
+- Docker Desktop krävs endast om du vill starta Supabase lokalt och köra lokala
+  databastester. Docker behövs inte för lint, typkontroll, Vitest eller
+  produktionsbygge.
+
+## Kom igång lokalt
+
+Installera beroenden från låsfilen:
 
 ```powershell
 npm.cmd ci
-npm.cmd run db:start
 ```
 
-Copy `.env.example` to `.env.local`, then use the local Supabase API URL and publishable key printed by `npm.cmd run db:start`:
+Kopiera miljövariabelmallen:
 
 ```powershell
 Copy-Item .env.example .env.local
 ```
 
-Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL` in `.env.local`. For local Supabase, the URL is usually `http://127.0.0.1:54321`; use the **Publishable key** shown in the CLI output, not the secret key. The local site URL is `http://localhost:3000`.
+Fyll i `.env.local` med värden från din egen Supabase-instans:
 
-Then start the app:
+| Variabel | Syfte |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase-projektets API-URL. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key. Använd inte en secret- eller service-role-nyckel. |
+| `NEXT_PUBLIC_SITE_URL` | Appens ursprung, exempelvis `http://localhost:3000` lokalt. |
+
+`.env.example` innehåller endast platshållare. Lägg aldrig in `.env.local`,
+lösenord, service-role-nycklar eller andra hemligheter i Git. Variabler med
+prefixet `NEXT_PUBLIC_` är avsedda att vara publika och får inte innehålla
+hemligheter.
+
+Starta utvecklingsservern:
 
 ```powershell
 npm.cmd run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). If using a hosted project instead, create it in Supabase and use its Project URL and publishable key from the project's API settings. Restart the Next.js server after editing `.env.local`. In PowerShell, use `npm.cmd` because the default script execution policy may block `npm.ps1`.
+Öppna sedan `http://localhost:3000`. I PowerShell används `npm.cmd` eftersom
+systemets körningspolicy kan blockera `npm.ps1`.
 
-## Available commands
-
-```powershell
-npm.cmd run dev        # Start the local development server
-npm.cmd run lint       # Check code with ESLint
-npm.cmd run typecheck  # Check TypeScript types
-npm.cmd test           # Run the unit tests once
-npm.cmd run build      # Create a production build
-npm.cmd start          # Serve the production build (after building)
-npm.cmd run db:start   # Start the local Supabase stack (requires Docker)
-npm.cmd run db:reset   # Recreate the local database from migrations
-npm.cmd run db:lint    # Check the local database schema
-npm.cmd run db:test    # Run pgTAP schema and RLS tests
-npm.cmd run db:stop    # Stop the local Supabase stack
-npm.cmd audit          # Check installed packages for known vulnerabilities
-```
-
-The Supabase CLI is pinned as a project development dependency and is available after `npm.cmd install`. Start Docker Desktop before running database commands. The first `db:start` downloads local service images.
-
-The Vitest suite uses React Testing Library and jsdom for credential-free UI tests, and mocks Supabase for server-action/data-access tests. It does not establish live database connectivity or RLS enforcement. There are no Playwright end-to-end tests yet: authentic CRUD E2E tests require a separately configured local Supabase stack and isolated test users/data.
-
-## Authentication setup
-
-The public routes are `/login` and `/register`. Registration validates email and password, checks the repeated password, and uses Supabase Auth. If email confirmation is enabled, the confirmation link returns through `/auth/callback`; after sign-in, the dashboard is available at `/`.
-
-For local Auth, start the Supabase stack as above. The local configuration uses `http://localhost:3000` as its site URL and allows the `/auth/callback` redirect. Email confirmations are disabled by default for the local stack, so a successful registration signs in immediately. If you enable confirmations, use the local Inbucket mail viewer to open the confirmation email.
-
-For a hosted Supabase project:
-
-1. Enable the Email provider in **Authentication → Sign In / Providers**.
-2. Set the project's **Site URL** to the deployed app origin (or `http://localhost:3000` for local development).
-3. Add the exact callback URL, such as `http://localhost:3000/auth/callback`, under **Authentication → URL Configuration → Redirect URLs**. Add the deployed app's callback URL when deploying.
-4. Copy `.env.example` to `.env.local` and fill in the project URL, publishable key, and app site URL. Do not use a service-role/secret key.
-
-The login and registration forms submit through server actions. Supabase Auth sessions are stored in cookies using `@supabase/ssr`; the Next.js 16 `proxy.ts` refreshes and verifies token claims, while the protected route-group layout independently calls Supabase `getUser()` before rendering the dashboard. Missing configuration or invalid sessions cannot expose the protected page. The database RLS policies are the authorization boundary for project and task data; authentication alone does not grant access to records.
-
-Authentication requires a configured Supabase Auth service to work end-to-end. Unit tests cover local validation and safe error messages without credentials; they do not prove live sign-in, registration, email delivery, session refresh, or hosted-project RLS behavior.
-
-## Local database and security tests
-
-The migration in `supabase/migrations/` defines `projects` and `tasks`. Both tables enable RLS. Project operations check the signed-in user's ownership; task operations check ownership of the task's parent project. Separate policies cover SELECT, INSERT, UPDATE, and DELETE, with UPDATE validating both the existing and resulting row. The database also constrains names, descriptions, statuses, and priorities, manages timestamps, and cascades task deletion with its project.
-
-Start and test the local schema:
+För lokal Supabase-utveckling visar kommandot nedan den lokala API-adressen och
+publishable key när tjänsterna startats:
 
 ```powershell
 npm.cmd run db:start
-npm.cmd run db:reset
+```
+
+Den befintliga migreringen
+[`supabase/migrations/20261014210000_create_projects_and_tasks.sql`](./supabase/migrations/20261014210000_create_projects_and_tasks.sql)
+definierar tabellerna `projects` och `tasks`, constraints, index, tidsstämplar,
+kaskadradering och RLS-policyer. Läs och granska migreringen innan den används.
+`npm.cmd run db:reset` återställer den lokala databasen och tillämpar befintliga
+lokala migreringar. Kör det endast när du uttryckligen vill tillämpa migreringar
+i en lokal utvecklingsdatabas; det har inte körts som del av
+dokumentationsarbetet. Ingen fjärrmigrering har tillämpats eller pushats.
+
+När en lokal databas har startats och migreringarna avsiktligt tillämpats kan
+databasschemat och pgTAP-testerna köras med:
+
+```powershell
 npm.cmd run db:lint
 npm.cmd run db:test
 ```
 
-The pgTAP tests use synthetic users and verify allowed owner operations, denied cross-user access and reassignment, anonymous-role grants, schema constraints, timestamps, and deletion behavior. Run `db:reset` after starting the local stack to apply the migration before starting the app. These tests run only against the local Supabase stack; passing them is evidence for the tested database policies, not a claim that the application is production-secure.
+Dessa kommandon kräver att den lokala Supabase-miljön är igång. Att migreringen
+och testerna finns i repot betyder inte att de har verifierats mot en
+hostad databas.
 
-Stop the local services with:
+## Utvecklings- och kvalitetskommandon
 
 ```powershell
-npm.cmd run db:stop
+npm.cmd run dev        # Starta utvecklingsservern
+npm.cmd run lint       # Kör ESLint
+npm.cmd run typecheck  # Kör TypeScript-kontroll utan att skapa byggfiler
+npm.cmd test           # Kör Vitest en gång
+npm.cmd run build      # Skapa produktionsbygget
+npm.cmd start          # Starta det skapade produktionsbygget
+npm.cmd audit          # Granska npm-beroenden efter kända sårbarheter
 ```
 
-Local schema development and testing do not require a hosted Supabase project or application environment variables. Applying migrations to a hosted project is a separate, deliberate step: create the project, authenticate and link the Supabase CLI locally, review the migration target, and then use the CLI's `db push` command. Do not share the database password or CLI credentials.
+### Senast verifierade automatiska kontroller
 
-The application uses `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL` from an ignored local `.env.local` file. These contain the public project URL, publishable key, and app origin; never put a service-role/secret key in a `NEXT_PUBLIC_` variable or browser code.
+Vid den senaste körningen i arbetskopian rapporterades:
 
-## Vercel and Supabase deployment checklist
+- `npm.cmd run lint` — godkänd.
+- `npm.cmd run typecheck` — godkänd.
+- `npm.cmd test` — godkänd: 11 testfiler och 50 tester.
+- `npm.cmd run build` — godkänd.
+- `npm.cmd audit` — 0 kända sårbarheter rapporterade.
+- `git diff --check` — godkänd.
 
-Deployment is not configured or verified yet. Before deploying:
+Vitest skrev även ut en icke-blockerande varning om Vite-konfigurationens
+config loader. De automatiska testerna omfattar enhets- och
+komponentbeteenden med mocks där det behövs. De bevisar inte att live
+autentisering, databasanslutning, RLS eller e-postbekräftelse fungerar.
 
-1. **Prepare Supabase.** Create or select the intended hosted project, enable the Email provider, and review the existing migration in `supabase/migrations/`. Apply it to that project through your approved database workflow before expecting project/task features to work. No migration has been applied or pushed as part of this work.
-2. **Configure Vercel.** Import the repository as a Next.js project and use the standard `npm run build` command. Select a Node.js version supported by Vercel and Next.js 16 (Node.js 20.9 or later). Add all three variables from `.env.example` in Vercel Project Settings → Environment Variables:
-   - `NEXT_PUBLIC_SUPABASE_URL` — the hosted Supabase project URL.
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — the project's publishable key only; never use a secret/service-role key.
-   - `NEXT_PUBLIC_SITE_URL` — the production app origin, including `https://` and no path, for example `https://<your-production-domain>`. Local development uses `http://localhost:3000`. These `NEXT_PUBLIC_` values are public and are made available to the application build; do not put secrets in them.
-   - Vercel's `VERCEL_URL` and `VERCEL_ENV` system variables are used for Preview confirmation links. Enable access to Vercel system environment variables for the deployment; no value for these variables should be added to `.env.example`.
-3. **Configure Supabase Auth URLs.** In Supabase Authentication → URL Configuration, set **Site URL** to the production app origin and add `https://<your-production-domain>/auth/callback` to **Redirect URLs**. Add `http://localhost:3000/auth/callback` for local development. For Vercel Preview deployments, the app builds the confirmation callback origin from that deployment's `VERCEL_URL`, so allow the resulting preview callback URLs using a narrowly scoped Supabase wildcard pattern. Do not use an unnecessarily broad redirect pattern.
-4. **Verify the deployed app manually.** Test registration (including the email confirmation link if enabled), sign-in, sign-out, protected routes, and project/task reads and mutations. Verify cross-user isolation against the hosted project's RLS policies using separate test accounts and non-production data. Local unit tests and a successful build do not prove these hosted behaviors.
-5. **Review the release.** Confirm the production domain, environment-variable assignments, callback allowlist, migration state, and Vercel build output before sharing the deployment.
+pgTAP-tester finns för den lokala databasen, men de kördes inte i den här
+verifieringen. Inga Playwright-baserade end-to-end-tester finns ännu.
 
-The callback handler exchanges the one-time Supabase code at `/auth/callback`; registration uses `NEXT_PUBLIC_SITE_URL` in local and production environments and the current deployment's `VERCEL_URL` in Vercel Preview. Supabase's Site URL is the default redirect, while the callback must also be allowed by its Redirect URLs list. See the [Next.js deployment guide](https://nextjs.org/docs/app/getting-started/deploying), [Vercel's Next.js guide](https://vercel.com/docs/frameworks/full-stack/nextjs), [Vercel system environment variables](https://vercel.com/docs/environment-variables/system-environment-variables), and [Supabase redirect URL guide](https://supabase.com/docs/guides/auth/redirect-urls).
+## Supabase och databas
 
-## Current functionality
+1. Skapa eller välj en Supabase-instans och konfigurera e-postleverantören i
+   Supabase Auth.
+2. Använd projektets URL och publishable key i `.env.local`; använd aldrig
+   service-role key i appen eller klientkod.
+3. Granska den befintliga SQL-migreringen och RLS-policyerna. Den avsedda
+   åtkomstmodellen är att projekt ägs av den autentiserade användaren och att
+   uppgifter endast är åtkomliga via ett projekt som användaren äger.
+4. För lokal utveckling kan Supabase CLI starta en isolerad stack. Kommandot
+   `db:reset` tillämpar lokala migreringar och raderar/återskapar den lokala
+   databasen; använd det endast när det är avsikten.
+5. En fjärrdatabas kräver separat granskning och uttryckligt godkännande av
+   målprojekt och migrering. Ingen fjärrmigrering har tillämpats eller pushats
+   här.
 
-- Responsive TaskFlow dashboard shell with desktop sidebar and mobile navigation.
-- Projects and tasks are loaded using the authenticated Supabase server client; RLS remains the database authorization boundary.
-- Create, edit, and delete projects and tasks, with server-side validation, safe feedback, and confirmation before deletion.
-- Task titles, descriptions, status, priority, due date, and project association.
-- Search, status/priority/project filters, and sorting for the current task list.
-- Project progress indicators calculated from completed and total tasks.
-- Overview cards for total, completed, and overdue tasks, calculated from saved tasks.
-- Loading, empty, database error, and mutation-pending states; responsive project cards and task table/mobile cards.
-- Supabase Auth email registration, sign-in, sign-out, confirmation callback, and protected dashboard route.
-- Credential-free unit and component tests for auth forms, workspace forms/states, validation, task summaries/filtering, Supabase data mapping, and authorization-sensitive server actions.
-- Calendar, reports, settings, and help navigation are visibly unavailable placeholders.
+**Viktigt:** kodgranskning och mockade tester är inte bevis på säkerhet i en
+ansluten miljö. Testa autentisering, dataåtkomst och isolering mellan separata
+testanvändare mot den avsedda Supabase-instansen innan riktiga användare eller
+produktionsdata används.
 
-## Not implemented yet
+## Förberedelser för framtida publicering
 
-- Password reset, OAuth, multi-factor authentication, and account management.
-- Working calendar, reports, settings, or team collaboration.
-- Automated browser end-to-end tests, CI, and a deployed/verified production environment.
+Appen är inte publicerad och ingen Vercel-konfiguration har verifierats. Inför
+en framtida driftsättning behöver ägaren:
 
-The schema and RLS rules are defined and covered by local pgTAP tests. The application tests mock Supabase and do not prove live database authorization or connectivity. Configure a Supabase project and apply the migration before relying on persisted data. Live authentication and database operations remain unverified until tested against a configured project. This repository has not been deployed, and no remote database migration has been performed.
+1. Granska migrationen och fastställa en separat, säker process för att
+   tillämpa den på rätt Supabase-projekt.
+2. Importera repot som ett Next.js-projekt i Vercel och verifiera att vald
+   Node.js-version stöds av Next.js 16.
+3. Konfigurera `NEXT_PUBLIC_SUPABASE_URL`,
+   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` och `NEXT_PUBLIC_SITE_URL` i rätt
+   Vercel-miljö. De två första värdena exponeras som publika klientvärden.
+4. Aktivera åtkomst till Vercels systemvariabler för Preview-miljöer. Koden
+   använder `VERCEL_URL` och `VERCEL_ENV` för callback-adressen vid
+   Preview-registrering; dessa värden ska inte läggas till som hemligheter i
+   `.env.example`.
+5. I Supabase Auth URL Configuration ange appens Site URL och tillåt callbacken
+   `/auth/callback` för produktionsdomänen. Lägg till lokal callback för
+   utveckling och konfigurera vid behov en snävt avgränsad Preview-regel.
+6. Efter driftsättning manuellt testa registrering, e-postbekräftelse,
+   inloggning, utloggning, skyddade sidor, CRUD och åtkomstisolering med
+   separata testkonton och icke-produktionsdata.
 
-## Technology
+Exakta domäner och autentiseringsinställningar beror på den miljö som ägaren
+väljer och har inte konfigurerats eller testats här. Ändra inte
+Supabase-projektets inställningar eller tillämpa fjärrmigreringar utan separat
+granskning.
 
-- Next.js App Router and React
-- TypeScript (strict mode)
-- Tailwind CSS
-- Lucide icons
-- Vitest
-- Zod
-- Supabase Auth with `@supabase/ssr`
-- Supabase CLI and PostgreSQL (local development and database tests)
+## Säkerhet och integritet
+
+- Autentiserade läsningar och ändringar använder Supabase-serverklienten och
+  användarens session. Server actions validerar indata med Zod och härleder
+  identiteten från autentiserad session.
+- Migreringen definierar separata RLS-policyer för projekt och deras uppgifter,
+  inklusive kontroller av ägarskap för operationerna.
+- `.env.local` ignoreras av Git; `.env.example` innehåller endast
+  platshållarvärden. Appen använder inte en service-role key i klientkod.
+- Supabase-sessioncookies används för kärnfunktionalitet. Analys eller
+  icke-nödvändig spårning har inte lagts till.
+- Projekt- och uppgiftsradering finns. Självbetjänad kontoradering och komplett
+  dataexport är däremot inte implementerade.
+- [Svenskt utkast till integritetspolicy](./PRIVACY-POLICY-DRAFT-SV.md) är
+  ofullständigt och inte redo att publiceras. Det fastställer inte
+  GDPR-efterlevnad.
+
+**Status för verifiering:** Supabase Auth, databasoperationer och RLS har inte
+verifierats i en riktig, ansluten miljö. Ingen fjärrmigrering har tillämpats.
+Applikationen har inte publicerats. Innan riktiga personuppgifter tas emot måste
+ägaren komplettera policyutkastet, fastställa laglig grund och lagringstider,
+granska personuppgiftsbiträdesavtal, underbiträden, regioner och
+överföringsarrangemang samt ta fram fungerande processer för registrerades
+begäranden och incidenthantering. Detta är inte juridisk rådgivning.
+
+## Tekniska beslut och verifierbara styrkor
+
+- **Servergräns för känsliga operationer:** Supabase-klienten för dataåtkomst
+  ligger på serversidan, och identitet hämtas genom Supabase Auth-sessionen
+  i stället för från ett användar-ID i formuläret.
+- **Flera åtkomstlager:** server actions kontrollerar session och relevanta
+  ägarskap; databasmigreringen definierar RLS som en separat
+  åtkomstkontroll. Detta beskriver koden, inte verifierad driftssäkerhet.
+- **Dataintegritet i schema:** migrationen definierar främmande nycklar,
+  constraints, index, tidsstämplar och kaskad från projekt till uppgifter.
+- **Validering nära indata:** Zod-scheman används av autentiserings- och
+  workspace-flöden, och komponenter ger fel- och väntetillstånd.
+- **Testbar domänlogik:** dashboardens beräkningar för sammanfattningar,
+  filtrering, sortering och projektförlopp har separata tester.
+- **Begränsad beroendemängd:** projektet använder den befintliga stacken för
+  formulär, validering, ikoner och tester i stället för att införa en ny
+  applikationsarkitektur för denna presentation.
+
+## Roadmap
+
+### Implementerat i koden
+
+- Responsiv projekt- och uppgiftshantering med autentiseringssidor.
+- Filtrering, sortering, sammanfattningar, formulärvalidering och
+  användarfeedback.
+- Supabase-migrering och RLS-policyer med tillhörande lokala pgTAP-tester.
+- Enhets- och komponenttester utan krav på riktiga kontouppgifter.
+
+Implementerat betyder inte att live-tjänster eller produktionskonfiguration har
+verifierats.
+
+### Återstår före produktionsanvändning
+
+- Konfigurera en Supabase-instans, granska och tillämpa migreringen genom en
+  kontrollerad process, och verifiera Auth, CRUD och RLS med isolerade
+  testkonton.
+- Köra de lokala databastesterna i en tillgänglig Supabase-miljö.
+- Konfigurera och manuellt verifiera Vercel, miljövariabler och
+  autentiseringscallbackar.
+- Komplettera och granska integritetspolicyn samt fastställa processer för
+  dataexport, kontoradering, lagring och incidenter.
+- Lägga till end-to-end-tester för viktiga användarflöden.
+
+### Möjliga framtida förbättringar
+
+- Självbetjäning för export och kontoradering efter säkerhets- och
+  datalivscykelgranskning.
+- Playwright-flöden för autentisering och CRUD mot en isolerad testmiljö.
+- Färdigställa kalender-, rapport- och inställningsfunktioner om de behövs.
+- CI-arbetsflöde som kör lint, typkontroll, tester och bygge.
+
+## Kända begränsningar
+
+- Live Supabase Auth, databasåtkomst och RLS är inte verifierade.
+- pgTAP-testerna har inte körts i denna verifiering, och automatiska
+  applikationstester använder mocks för Supabase-beroende beteenden.
+- Kontoexport, kontoradering, lösenordsåterställning, OAuth och
+  flerfaktorsautentisering finns inte.
+- Kalender, rapporter, inställningar och hjälp är inte implementerade.
+- Ingen Playwright-baserad end-to-end-svit, CI-konfiguration eller
+  produktionsdriftsättning har verifierats.
+- Integritetspolicyn är ett ofullständigt utkast och utgör inte ett påstående om
+  GDPR-efterlevnad.
