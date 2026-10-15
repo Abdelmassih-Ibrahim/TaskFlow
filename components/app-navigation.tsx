@@ -29,9 +29,12 @@ const primaryNavigation = [
   { label: "Projekt", href: "#projects", icon: FolderKanban, active: false },
 ];
 
+const secondaryNavigation = [
+  { label: "Rapporter", href: "/reports", icon: BarChart3 },
+];
+
 const unavailableNavigation = [
   { label: "Kalender", icon: CalendarDays },
-  { label: "Rapporter", icon: BarChart3 },
 ];
 
 function SidebarContent({
@@ -102,6 +105,18 @@ function SidebarContent({
           Organisera
         </p>
         <ul className="space-y-1">
+          {secondaryNavigation.map(({ label, href, icon: Icon }) => (
+            <li key={label}>
+              <Link
+                href={href}
+                onClick={onNavigate}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
+              >
+                <Icon size={17} aria-hidden="true" className="text-slate-500" />
+                {label}
+              </Link>
+            </li>
+          ))}
           {unavailableNavigation.map(({ label, icon: Icon }) => (
             <li key={label}>
               <span
