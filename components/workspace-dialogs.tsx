@@ -129,7 +129,7 @@ function DialogActions({
     <div className="flex flex-col-reverse gap-2 border-t border-slate-100 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
       <button
         type="button"
-        onClick={onClose}
+        onClick={() => onClose()}
         disabled={pending}
         className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
       >

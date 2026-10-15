@@ -87,7 +87,9 @@ export function WorkspaceDashboard({
   );
   const closeDialog = useCallback((successMessage?: string) => {
     setActiveDialog(null);
-    if (successMessage) setNotice(successMessage);
+    if (typeof successMessage === "string" && successMessage) {
+      setNotice(successMessage);
+    }
   }, []);
 
   useEffect(() => {
