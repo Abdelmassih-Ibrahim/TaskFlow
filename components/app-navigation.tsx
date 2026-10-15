@@ -31,11 +31,10 @@ const primaryNavigation = [
 
 const secondaryNavigation = [
   { label: "Rapporter", href: "/reports", icon: BarChart3 },
+  { label: "Kalender", href: "/calendar", icon: CalendarDays },
 ];
 
-const unavailableNavigation = [
-  { label: "Kalender", icon: CalendarDays },
-];
+const unavailableNavigation = [];
 
 function SidebarContent({
   email,
