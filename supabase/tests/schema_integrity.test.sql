@@ -124,19 +124,17 @@ select extensions.results_eq(
   array[true],
   'project insert timestamps are set by the database'
 );
+update public.projects
+set name = 'Updated schema test project',
+    created_at = '1900-01-01 00:00:00+00',
+    updated_at = '1900-01-01 00:00:00+00'
+where id = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 select extensions.ok(
   (
-    with updated as (
-      update public.projects
-      set name = 'Updated schema test project',
-          created_at = '1900-01-01 00:00:00+00',
-          updated_at = '1900-01-01 00:00:00+00'
-      where id = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'
-      returning created_at, updated_at
-    )
     select created_at > '2000-01-01 00:00:00+00'::timestamptz
       and updated_at > created_at
-    from updated
+    from public.projects
+    where id = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'
   ),
   'project updates preserve created_at and refresh updated_at'
 );
@@ -157,19 +155,17 @@ select extensions.results_eq(
   array[true],
   'task insert timestamps are set by the database'
 );
+update public.tasks
+set title = 'Updated schema test task',
+    created_at = '1900-01-01 00:00:00+00',
+    updated_at = '1900-01-01 00:00:00+00'
+where id = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 select extensions.ok(
   (
-    with updated as (
-      update public.tasks
-      set title = 'Updated schema test task',
-          created_at = '1900-01-01 00:00:00+00',
-          updated_at = '1900-01-01 00:00:00+00'
-      where id = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'
-      returning created_at, updated_at
-    )
     select created_at > '2000-01-01 00:00:00+00'::timestamptz
       and updated_at > created_at
-    from updated
+    from public.tasks
+    where id = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'
   ),
   'task updates preserve created_at and refresh updated_at'
 );
