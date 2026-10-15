@@ -366,7 +366,21 @@ export async function updateTaskStatusAction(
     existingTask.project_id,
     context.user.id,
   );
-  if (!isOwner) return actionError("Uppgiften är inte tillgänglig.");
+
+  // If not owner, check if user is an editor/admin member
+  if (!isOwner) {
+    const { data: member } = await context.supabase
+      .from("project_members")
+      .select("role")
+      .eq("project_id", existingTask.project_id)
+      .eq("user_id", context.user.id)
+      .is("joined_at", "not.is.null")
+      .maybeSingle();
+
+    if (!member || !["editor", "admin"].includes(member.role)) {
+      return actionError("Du har inte behörighet att uppdatera denna uppgift.");
+    }
+  }
 
   const { data, error } = await context.supabase
     .from("tasks")

@@ -1,6 +1,6 @@
 import "server-only";
 import { createSupabaseServerClient } from "../supabase/server";
-import type { Project, TaskWithProject, WorkspaceData } from "./types";
+import type { Project, TaskWithProject, WorkspaceData, ProjectMember, Invitation } from "./types";
 
 const emptyWorkspace: WorkspaceData = {
   projects: [],
@@ -23,7 +23,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
     error: projectsError,
   } = await supabase
     .from("projects")
-    .select("id, owner_id, name, description, created_at, updated_at")
+    .select("id, owner_id, name, description, created_at, updated_at, is_shared")
     .order("updated_at", { ascending: false });
 
   if (projectsError) {
@@ -34,11 +34,11 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
   }
 
   if (projects.length === 0) {
-    return { ...emptyWorkspace, projects };
+    return { ...emptyWorkspace, projects: projects as Project[] };
   }
 
   const projectById = new Map<string, Project>(
-    projects.map((project) => [project.id, project]),
+    projects.map((project) => [project.id, project as Project]),
   );
   const {
     data: tasks,
@@ -66,5 +66,31 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
     return project ? [{ ...task, project: { id: project.id, name: project.name } }] : [];
   });
 
-  return { projects, tasks: tasksWithProjects, error: null };
+  return { projects: projects as Project[], tasks: tasksWithProjects, error: null };
+}
+
+export async function getProjectMembers(
+  projectId: string,
+): Promise<{ members: ProjectMember[]; invitations: Invitation[] } | null> {
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase) return null;
+
+  const [{ data: members }, { data: invitations }] = await Promise.all([
+    supabase
+      .from("project_members")
+      .select("*")
+      .eq("project_id", projectId)
+      .is("joined_at", "not.is.null"),
+    supabase
+      .from("invitations")
+      .select("*")
+      .eq("project_id", projectId)
+      .is("accepted_at", "is.null"),
+  ]);
+
+  return {
+    members: (members || []) as ProjectMember[],
+    invitations: (invitations || []) as Invitation[],
+  };
 }
