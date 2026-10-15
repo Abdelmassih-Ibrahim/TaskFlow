@@ -8,52 +8,25 @@ filtrering, sammanfattningar och en responsiv dashboard.
 > **Språk:** Användargränssnittet är på svenska.
 
 > **Status:** Funktionerna är implementerade i koden och verifierade med
-> automatiska kontroller där det anges nedan. Supabase Auth,
-> databasoperationer och Row Level Security (RLS) har inte verifierats mot en
-> ansluten Supabase-miljö. Ingen fjärrmigrering har tillämpats och appen har
-> inte publicerats.
+> automatiska kontroller samt mot en **lokal** Supabase-stack (se
+> [Verifieringsstatus](#verifieringsstatus)). Ingen hostad Supabase-miljö är
+> verifierad, ingen fjärrmigrering har tillämpats och appen har inte
+> publicerats.
 
 ## Skärmbilder
 
-Inga skärmbilder finns i repot ännu. En lämplig plats för framtida, autentiska
-bilder är `docs/screenshots/`. Lägg inte in skärmbildsreferenser här förrän
-respektive bild faktiskt har skapats och granskats. Skärmbilder ska visa den
-aktuella implementationen och inte antyda att en liveintegration har verifierats.
+Bilderna är tagna i den verkliga appen (produktionsbygge) mot en lokal,
+isolerad Supabase-databas med ett syntetiskt testkonto och syntetiska projekt
+och uppgifter. Ingen mockad vy har använts och inga skyddsmekanismer har
+kringgåtts. Den enda uppgiften om en person som syns är den syntetiska
+adressen `anna.demo@example.com` (reserverad exempeldomän) i sidomenyn.
 
-### Så kan skärmbilder tas när en testmiljö finns
-
-Den skyddade dashboarden kräver en konfigurerad Supabase-instans och ett giltigt
-användarsessionstillstånd. I den nuvarande lokala miljön saknas `.env.local`.
-När `http://localhost:3000/` laddas om skickas den därför till
-`/login?error=configuration`, där appen anger att
-`NEXT_PUBLIC_SUPABASE_URL` och `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` saknas.
-Den nuvarande appen har ingen aktiv demovy eller mockad dashboardväg:
-`lib/demo-tasks.ts` innehåller äldre test-/demo-fixturedata men används inte av
-den skyddade dashboarden. Autentisering eller databaskontroller ska inte
-kringgås för att skapa bilder.
-
-För att senare ta representativa bilder utan att använda riktiga användardata:
-
-1. Använd en separat lokal eller test-Supabase-instans och en syntetisk
-   testanvändare. Konfigurera lokalt de tre variablerna som beskrivs ovan.
-2. Läs igenom den befintliga migreringen och tillämpa den endast i den
-   uttryckligen valda, isolerade testdatabasen. Lokalt kräver Supabase CLI
-   Docker; migreringen tillämpas först när ett separat kommando som
-   `npm.cmd run db:reset` körs. Inget av detta har gjorts här.
-3. Starta appen med `npm.cmd run dev`, logga in med testkontot och skapa
-   syntetiska projekt och uppgifter genom gränssnittet.
-4. Ta en desktopbild av dashboarden, där översikt, projekt och uppgifter visas
-   på samma sida. Använd navigeringslänkarna Översikt, Projekt och Mina
-   uppgifter för att visa respektive sektion inför bilden.
-5. Öppna webbläsarens responsiva enhetsvy, kontrollera att mobilnavigering och
-   uppgiftskort fungerar, och ta en separat mobilbild.
-6. Granska bilderna för e-postadresser, personuppgifter, tokens och annan
-   känslig information innan du sparar dem i `docs/screenshots/`. Lägg därefter
-   till README-bildreferenser till just de filer som faktiskt finns.
-
-Det skapades inga skärmbilder i denna genomgång. Att skapa dem kräver först en
-separat testmiljö med Supabase-konfiguration och en migrerad testdatabas; ingen
-konfiguration eller migrering har gjorts.
+| Vy | Skärmbild |
+| --- | --- |
+| Dashboard (desktop) | ![Dashboard på desktop](./docs/screenshots/dashboard-desktop.png) |
+| Projekt och uppgifter (desktop) | ![Uppgiftslista på desktop](./docs/screenshots/tasks-desktop.png) |
+| Dashboard (mobil) | ![Dashboard på mobil](./docs/screenshots/dashboard-mobile.png) |
+| Uppgifter (mobil) | ![Uppgifter på mobil](./docs/screenshots/tasks-mobile.png) |
 
 ## Funktioner i koden
 
@@ -187,24 +160,42 @@ npm.cmd start          # Starta det skapade produktionsbygget
 npm.cmd audit          # Granska npm-beroenden efter kända sårbarheter
 ```
 
-### Senast verifierade automatiska kontroller
+### Verifieringsstatus
 
-Vid den senaste körningen i arbetskopian rapporterades:
+Kontrollerna nedan kördes i arbetskopian 2026-10-15:
 
 - `npm.cmd run lint` — godkänd.
 - `npm.cmd run typecheck` — godkänd.
-- `npm.cmd test` — godkänd: 11 testfiler och 50 tester.
+- `npm.cmd test` — godkänd: 12 testfiler och 52 tester.
 - `npm.cmd run build` — godkänd.
 - `npm.cmd audit` — 0 kända sårbarheter rapporterade.
 - `git diff --check` — godkänd.
 
-Vitest skrev även ut en icke-blockerande varning om Vite-konfigurationens
-config loader. De automatiska testerna omfattar enhets- och
-komponentbeteenden med mocks där det behövs. De bevisar inte att live
-autentisering, databasanslutning, RLS eller e-postbekräftelse fungerar.
+Vitest skriver även ut en icke-blockerande varning om Vite-konfigurationens
+config loader.
 
-pgTAP-tester finns för den lokala databasen, men de kördes inte i den här
-verifieringen. Inga Playwright-baserade end-to-end-tester finns ännu.
+**Lokal Supabase (Docker Desktop, `supabase start`):**
+
+- Migreringen tillämpades automatiskt på den lokala databasen vid start.
+- `npm.cmd run db:lint` — inga schemafel.
+- `npm.cmd run db:test` — 3 pgTAP-filer, 71 tester, alla godkända. De täcker
+  schemabegränsningar, tidsstämplar, främmande nycklar, kaskadradering
+  (projekt → uppgifter och användare → projekt → uppgifter), RLS för `anon`,
+  ägare och en annan användare (läsa, skapa, ändra, radera), förbud mot att
+  överföra ett projekt och mot att flytta en uppgift till en annans projekt.
+- Registrering, inloggning, skapande av projekt/uppgifter via gränssnittet och
+  skärmbilderna ovan kördes manuellt mot den lokala stacken med ett syntetiskt
+  konto.
+- Under verifieringen rättades ett fel i testfilen
+  `supabase/tests/schema_integrity.test.sql` (en `WITH`-sats med `UPDATE` inuti
+  ett uttryck är ogiltig SQL). Migreringen ändrades inte.
+- Containern `supabase_vector` startade om i loopen på den här datorn. Den
+  används bara för logginsamling och påverkade inte databastesterna.
+
+**Inte verifierat:** hostad Supabase, e-postbekräftelse och
+Auth-redirects i en riktig miljö, Vercel-bygge och preview/produktion,
+end-to-end-tester (Playwright saknas), tillgänglighet med skärmläsare och
+CI (ingen arbetsflödesfil finns).
 
 ## Supabase och databas
 
@@ -229,7 +220,9 @@ produktionsdata används.
 
 ## Förberedelser för framtida publicering
 
-Appen är inte publicerad och ingen Vercel-konfiguration har verifierats. Inför
+Appen är inte publicerad och ingen Vercel-konfiguration har verifierats. Se den
+fullständiga svenska checklistan i
+[`docs/RELEASE-CHECKLIST-SV.md`](./docs/RELEASE-CHECKLIST-SV.md). Sammanfattning: Inför
 en framtida driftsättning behöver ägaren:
 
 1. Granska migrationen och fastställa en separat, säker process för att
@@ -264,6 +257,10 @@ granskning.
   inklusive kontroller av ägarskap för operationerna.
 - `.env.local` ignoreras av Git; `.env.example` innehåller endast
   platshållarvärden. Appen använder inte en service-role key i klientkod.
+- Svarshuvuden `X-Content-Type-Options`, `X-Frame-Options`,
+  `Referrer-Policy` och `Permissions-Policy` sätts i `next.config.ts` (testat
+  och kontrollerat med `curl` mot produktionsbygget). Ingen Content Security
+  Policy är införd; det är framtida arbete.
 - Supabase-sessioncookies används för kärnfunktionalitet. Analys eller
   icke-nödvändig spårning har inte lagts till.
 - Projekt- och uppgiftsradering finns. Självbetjänad kontoradering och komplett
@@ -272,9 +269,9 @@ granskning.
   ofullständigt och inte redo att publiceras. Det fastställer inte
   GDPR-efterlevnad.
 
-**Status för verifiering:** Supabase Auth, databasoperationer och RLS har inte
-verifierats i en riktig, ansluten miljö. Ingen fjärrmigrering har tillämpats.
-Applikationen har inte publicerats. Innan riktiga personuppgifter tas emot måste
+**Status för verifiering:** RLS och schema är verifierade mot en lokal
+Supabase-stack (pgTAP) men inte mot en hostad miljö. Ingen fjärrmigrering har
+tillämpats. Applikationen har inte publicerats. Innan riktiga personuppgifter tas emot måste
 ägaren komplettera policyutkastet, fastställa laglig grund och lagringstider,
 granska personuppgiftsbiträdesavtal, underbiträden, regioner och
 överföringsarrangemang samt ta fram fungerande processer för registrerades
@@ -316,7 +313,7 @@ verifierats.
 - Konfigurera en Supabase-instans, granska och tillämpa migreringen genom en
   kontrollerad process, och verifiera Auth, CRUD och RLS med isolerade
   testkonton.
-- Köra de lokala databastesterna i en tillgänglig Supabase-miljö.
+- Köra de lokala databastesterna i CI (de har körts manuellt lokalt).
 - Konfigurera och manuellt verifiera Vercel, miljövariabler och
   autentiseringscallbackar.
 - Komplettera och granska integritetspolicyn samt fastställa processer för
@@ -333,9 +330,10 @@ verifierats.
 
 ## Kända begränsningar
 
-- Live Supabase Auth, databasåtkomst och RLS är inte verifierade.
-- pgTAP-testerna har inte körts i denna verifiering, och automatiska
-  applikationstester använder mocks för Supabase-beroende beteenden.
+- Live Supabase Auth mot en hostad miljö samt hostad databasåtkomst och RLS är
+  inte verifierade (lokal stack är verifierad, se Verifieringsstatus).
+- Automatiska applikationstester använder mocks för Supabase-beroende
+  beteenden; pgTAP-testerna körs manuellt lokalt och inte i CI.
 - Kontoexport, kontoradering, lösenordsåterställning, OAuth och
   flerfaktorsautentisering finns inte.
 - Kalender, rapporter, inställningar och hjälp är inte implementerade.
