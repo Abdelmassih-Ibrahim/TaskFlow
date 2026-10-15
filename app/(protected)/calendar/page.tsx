@@ -1,6 +1,13 @@
-'use client';
+import { getWorkspaceData } from '@/lib/workspace/data';
+import { CalendarContent } from '@/components/calendar-content';
 
-import { useState } from 'react';
+export const dynamic = 'force-dynamic';
+
+export default async function CalendarPage() {
+  const workspace = await getWorkspaceData();
+
+  return <CalendarContent {...workspace} />;
+}
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { TaskWithProject } from '@/lib/workspace/types';
 import {

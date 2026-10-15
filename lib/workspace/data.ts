@@ -23,7 +23,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
     error: projectsError,
   } = await supabase
     .from("projects")
-    .select("id, owner_id, name, description, created_at, updated_at, is_shared")
+    .select("id, owner_id, name, description, created_at, updated_at")
     .order("updated_at", { ascending: false });
 
   if (projectsError) {

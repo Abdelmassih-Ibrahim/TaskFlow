@@ -1,5 +1,21 @@
+-- Drop existing policies if they exist (cleanup from partial run)
+drop policy if exists "project_members_view_own_project" on public.project_members;
+drop policy if exists "project_members_view_self" on public.project_members;
+drop policy if exists "project_members_insert_as_owner" on public.project_members;
+drop policy if exists "project_members_update_as_owner" on public.project_members;
+drop policy if exists "project_members_delete_as_owner" on public.project_members;
+drop policy if exists "invitations_view_own_project" on public.invitations;
+drop policy if exists "invitations_view_own_email" on public.invitations;
+drop policy if exists "invitations_insert_as_owner" on public.invitations;
+drop policy if exists "invitations_update_as_owner" on public.invitations;
+drop policy if exists "invitations_delete_as_owner" on public.invitations;
+
+-- Drop tables if they exist
+drop table if exists public.invitations;
+drop table if exists public.project_members;
+
 -- Create project_members table
-create table if not exists public.project_members (
+create table public.project_members (
   id uuid primary key default gen_random_uuid(),
   project_id uuid not null references public.projects (id) on delete cascade,
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -14,11 +30,11 @@ create table if not exists public.project_members (
   constraint unique_member_per_project unique(project_id, user_id)
 );
 
-create index if not exists project_members_project_id on public.project_members(project_id);
-create index if not exists project_members_user_id on public.project_members(user_id);
+create index project_members_project_id on public.project_members(project_id);
+create index project_members_user_id on public.project_members(user_id);
 
 -- Create invitations table
-create table if not exists public.invitations (
+create table public.invitations (
   id uuid primary key default gen_random_uuid(),
   project_id uuid not null references public.projects (id) on delete cascade,
   email text not null,
@@ -32,14 +48,14 @@ create table if not exists public.invitations (
   constraint valid_role check (role in ('viewer', 'editor', 'admin', 'reporter'))
 );
 
-create unique index if not exists invitations_unique_pending
+create unique index invitations_unique_pending
   on public.invitations(project_id, email)
   where accepted_at is null;
 
-create index if not exists invitations_email on public.invitations(email);
-create index if not exists invitations_token on public.invitations(token);
+create index invitations_email on public.invitations(email);
+create index invitations_token on public.invitations(token);
 
--- Add is_shared column to projects
+-- Add is_shared column to projects if it doesn't exist
 alter table public.projects add column if not exists is_shared boolean default false;
 
 -- Enable RLS

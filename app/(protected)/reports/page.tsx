@@ -1,6 +1,13 @@
-'use client';
+import { getWorkspaceData } from '@/lib/workspace/data';
+import { ReportsContent } from '@/components/reports-content';
 
-import { useState, useMemo } from 'react';
+export const dynamic = 'force-dynamic';
+
+export default async function ReportsPage() {
+  const workspace = await getWorkspaceData();
+
+  return <ReportsContent {...workspace} />;
+}
 import { Check, ListTodo, Clock3, TrendingUp } from 'lucide-react';
 import { getWorkspaceSummary, getProjectProgress } from '@/lib/workspace/dashboard';
 import { calculateBurndownData, calculateVelocity, getProjectSummaries, getStatusDistribution } from '@/lib/workspace/reports';
