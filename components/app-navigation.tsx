@@ -121,14 +121,14 @@ function SidebarContent({
       </nav>
 
       <div className="space-y-1 border-t border-white/[0.08] px-3 py-4">
-        <span
-          aria-disabled="true"
-          title="Inställningar är inte tillgängliga ännu"
-          className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-slate-500"
+        <Link
+          href="/account"
+          onClick={onNavigate}
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
         >
-          <Settings2 size={16} aria-hidden="true" className="text-slate-600" />
-          Inställningar
-        </span>
+          <Settings2 size={16} aria-hidden="true" className="text-slate-500" />
+          Konto
+        </Link>
         <span
           aria-disabled="true"
           title="Hjälp är inte tillgänglig ännu"

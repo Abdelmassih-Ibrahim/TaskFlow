@@ -27,8 +27,9 @@ respektive leverantörskonto.
       test och build innan produktion.
 - [ ] **Content Security Policy** är inte införd.
 - [ ] **Integritetspolicyn** (`PRIVACY-POLICY-DRAFT-SV.md`) är ett utkast.
-- [ ] **Ingen kontoradering/export** finns; bestäm hantering av registrerades
-      begäranden innan riktiga användare registreras.
+- [ ] **Kontoradering** finns på `/account` men är bara testad lokalt. Testa den
+      med ett testkonto efter publicering. **Dataexport** finns inte; bestäm
+      hantering av registrerades begäranden innan riktiga användare registreras.
 - [ ] **Lösenordsåterställning** finns inte.
 
 ## C. Skapa eller välj Supabase-projekt
@@ -37,8 +38,10 @@ respektive leverantörskonto.
       Använd inte ett projekt med annan data. Välj region utifrån
       dataskyddskrav och notera den.
 - [ ] Notera projektets URL och **publishable key** (Project Settings → API).
-      Service-role/secret-nyckeln ska **inte** användas av appen och aldrig
-      läggas i Vercel-variabler för detta projekt eller i Git.
+      Service-role/secret-nyckeln används **endast** av kontoraderingen på
+      serversidan. Lägg den i Vercel som hemlig variabel
+      `SUPABASE_SERVICE_ROLE_KEY` (aldrig med `NEXT_PUBLIC_`, aldrig i Git).
+      Utan den visar `/account` ett felmeddelande vid radering.
 - [ ] Kontrollera i Supabase att Row Level Security är aktivt på `projects`
       och `tasks` efter migreringen (Table Editor / Auth → Policies).
 
@@ -74,7 +77,7 @@ respektive leverantörskonto.
 - [ ] Ställ in Node-version (se B).
 - [ ] Lägg till variabler per miljö (Production / Preview / Development):
       `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
-      `NEXT_PUBLIC_SITE_URL` (= produktionsdomänen i Production).
+      `NEXT_PUBLIC_SITE_URL` (= produktionsdomänen i Production), samt       den hemliga servernyckeln `SUPABASE_SERVICE_ROLE_KEY` (markera som Sensitive).
       Variabler med `NEXT_PUBLIC_` blir publika; lägg inga hemligheter i dem.
 - [ ] Aktivera "Automatically expose System Environment Variables" så att
       `VERCEL_URL` och `VERCEL_ENV` finns (används för Preview-registrering).

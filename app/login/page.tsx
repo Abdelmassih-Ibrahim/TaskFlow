@@ -12,7 +12,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     setupMessage ??
     (notice === "signed-out"
       ? "Du har loggat ut."
-      : error === "confirmation"
+      : notice === "account-deleted"
+        ? "Ditt konto och dina data har raderats."
+        : error === "confirmation"
         ? "Bekräftelselänken kunde inte användas. Registrera dig igen för att få en ny länk."
         : undefined);
 

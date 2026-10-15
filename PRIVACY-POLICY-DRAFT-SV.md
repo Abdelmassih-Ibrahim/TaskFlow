@@ -80,7 +80,7 @@ process för att ta emot, bedöma, besvara och dokumentera sådana begäranden s
 för att hantera eventuella undantag och tidsfrister.
 
 TaskFlow har för närvarande ingen självbetjäningsfunktion för att exportera
-samtliga personuppgifter eller radera ett konto. Projekt- och uppgiftshantering
+samtliga personuppgifter. Kontoradering finns (se nedan). Projekt- och uppgiftshantering
 i appen är inte likvärdig med en fullständig export av kontouppgifter eller
 leverantörsloggar. Ägaren behöver hantera dessa begäranden manuellt tills
 granskade och testade arbetsflöden finns på plats.
@@ -100,8 +100,11 @@ bedöms. Inga sådana operativa processer bekräftas av detta utkast.
 
 ## Konton, radering och säkerhetskopior
 
-Det finns ingen funktion i appen för att radera ett Supabase Auth-konto.
-Migrationen anger `ON DELETE CASCADE` från `auth.users` till användarens projekt
+Appen har en sida (`/account`) där inloggade användare kan radera sitt konto
+efter att ha bekräftat e-postadress och lösenord. Funktionen är kodgranskad,
+enhetstestad och kaskaden är kontrollerad mot lokal Supabase, men den är inte
+verifierad i en hostad miljö. Den kräver en serverhemlighet
+(`SUPABASE_SERVICE_ROLE_KEY`). Migrationen anger `ON DELETE CASCADE` från `auth.users` till användarens projekt
 och vidare från projekt till uppgifter. Detta beskriver databasschemat, inte en
 verifierad produktionsradering. Kontoavslut måste ske genom ett granskat,
 behörigt server- eller administratörsflöde; en privilegierad nyckel får aldrig

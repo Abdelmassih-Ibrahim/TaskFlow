@@ -105,6 +105,7 @@ Fyll i `.env.local` med värden från din egen Supabase-instans:
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase-projektets API-URL. |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key. Använd inte en secret- eller service-role-nyckel. |
 | `NEXT_PUBLIC_SITE_URL` | Appens ursprung, exempelvis `http://localhost:3000` lokalt. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Hemlig, endast serverside, utan `NEXT_PUBLIC_`. Används enbart av kontoraderingen (`/account`). Utan den fungerar appen i övrigt, men radering ger ett felmeddelande. |
 
 `.env.example` innehåller endast platshållare. Lägg aldrig in `.env.local`,
 lösenord, service-role-nycklar eller andra hemligheter i Git. Variabler med
@@ -166,7 +167,7 @@ Kontrollerna nedan kördes i arbetskopian 2026-10-15:
 
 - `npm.cmd run lint` — godkänd.
 - `npm.cmd run typecheck` — godkänd.
-- `npm.cmd test` — godkänd: 12 testfiler och 52 tester.
+- `npm.cmd test` — godkänd: 13 testfiler och 59 tester.
 - `npm.cmd run build` — godkänd.
 - `npm.cmd audit` — 0 kända sårbarheter rapporterade.
 - `git diff --check` — godkänd.
@@ -201,8 +202,9 @@ CI (ingen arbetsflödesfil finns).
 
 1. Skapa eller välj en Supabase-instans och konfigurera e-postleverantören i
    Supabase Auth.
-2. Använd projektets URL och publishable key i `.env.local`; använd aldrig
-   service-role key i appen eller klientkod.
+2. Använd projektets URL och publishable key i `.env.local`. Service-role-nyckeln
+   används bara av serveråtgärden för kontoradering (`lib/supabase/admin.ts`),
+   får aldrig ha prefixet `NEXT_PUBLIC_` och får aldrig finnas i klientkod.
 3. Granska den befintliga SQL-migreringen och RLS-policyerna. Den avsedda
    åtkomstmodellen är att projekt ägs av den autentiserade användaren och att
    uppgifter endast är åtkomliga via ett projekt som användaren äger.
@@ -256,15 +258,21 @@ granskning.
 - Migreringen definierar separata RLS-policyer för projekt och deras uppgifter,
   inklusive kontroller av ägarskap för operationerna.
 - `.env.local` ignoreras av Git; `.env.example` innehåller endast
-  platshållarvärden. Appen använder inte en service-role key i klientkod.
+  platshållarvärden. Service-role key används endast i serveråtgärden för
+  kontoradering och aldrig i klientkod.
 - Svarshuvuden `X-Content-Type-Options`, `X-Frame-Options`,
   `Referrer-Policy` och `Permissions-Policy` sätts i `next.config.ts` (testat
   och kontrollerat med `curl` mot produktionsbygget). Ingen Content Security
   Policy är införd; det är framtida arbete.
 - Supabase-sessioncookies används för kärnfunktionalitet. Analys eller
   icke-nödvändig spårning har inte lagts till.
-- Projekt- och uppgiftsradering finns. Självbetjänad kontoradering och komplett
-  dataexport är däremot inte implementerade.
+- Självbetjänad kontoradering finns på `/account`: användaren måste skriva sin
+  e-postadress och sitt lösenord (ny autentisering), och servern raderar
+  endast den verifierade sessionens användare. Databaskaskaden tar bort
+  projekt och uppgifter. Verifierat i enhetstester (mockade) och mot lokal
+  Supabase (kaskad kontrollerad); **inte** testat i hostad miljö, och
+  leverantörens säkerhetskopior omfattas inte. Komplett dataexport är inte
+  implementerad.
 - [Svenskt utkast till integritetspolicy](./PRIVACY-POLICY-DRAFT-SV.md) är
   ofullständigt och inte redo att publiceras. Det fastställer inte
   GDPR-efterlevnad.
@@ -322,8 +330,7 @@ verifierats.
 
 ### Möjliga framtida förbättringar
 
-- Självbetjäning för export och kontoradering efter säkerhets- och
-  datalivscykelgranskning.
+- Självbetjäning för dataexport efter säkerhets- och datalivscykelgranskning.
 - Playwright-flöden för autentisering och CRUD mot en isolerad testmiljö.
 - Färdigställa kalender-, rapport- och inställningsfunktioner om de behövs.
 - CI-arbetsflöde som kör lint, typkontroll, tester och bygge.
@@ -334,9 +341,10 @@ verifierats.
   inte verifierade (lokal stack är verifierad, se Verifieringsstatus).
 - Automatiska applikationstester använder mocks för Supabase-beroende
   beteenden; pgTAP-testerna körs manuellt lokalt och inte i CI.
-- Kontoexport, kontoradering, lösenordsåterställning, OAuth och
+- Kontoexport, lösenordsåterställning, OAuth och
   flerfaktorsautentisering finns inte.
-- Kalender, rapporter, inställningar och hjälp är inte implementerade.
+- Kalender, rapporter och hjälp är inte implementerade (sidan Konto med
+  kontoradering finns).
 - Ingen Playwright-baserad end-to-end-svit, CI-konfiguration eller
   produktionsdriftsättning har verifierats.
 - Integritetspolicyn är ett ofullständigt utkast och utgör inte ett påstående om
