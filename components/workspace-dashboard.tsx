@@ -9,11 +9,14 @@ import {
   Sparkles,
   Clock3,
   X,
+  LayoutGrid,
+  Table2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { deleteProject } from "@/app/actions/workspace";
 import { SummaryCard } from "@/components/summary-card";
 import { TaskTable } from "@/components/task-table";
+import { KanbanBoard } from "@/components/kanban-board";
 import {
   filterAndSortTasks,
   getProjectProgress,
@@ -76,6 +79,7 @@ export function WorkspaceDashboard({
   const [priority, setPriority] = useState<TaskPriority | "all">("all");
   const [projectId, setProjectId] = useState("");
   const [sort, setSort] = useState<TaskSort>("due_date");
+  const [view, setView] = useState<"table" | "kanban">("table");
   const [notice, setNotice] = useState<string | null>(null);
   const dialogTriggerRef = useRef<HTMLElement | null>(null);
   const openDialog = useCallback(
@@ -444,20 +448,46 @@ export function WorkspaceDashboard({
                       Sök, filtrera och organisera uppgifter i dina projekt.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={(event) =>
-                      openDialog(
-                        { type: "task", task: null },
-                        event.currentTarget,
-                      )
-                    }
-                    disabled={projects.length === 0}
-                    className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <Plus size={15} aria-hidden="true" />
-                    Lägg till uppgift
-                  </button>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setView("table")}
+                      className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                        view === "table"
+                          ? "bg-slate-900 text-white"
+                          : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      <Table2 size={15} aria-hidden="true" />
+                      Tabell
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setView("kanban")}
+                      className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                        view === "kanban"
+                          ? "bg-slate-900 text-white"
+                          : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      <LayoutGrid size={15} aria-hidden="true" />
+                      Kanban
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(event) =>
+                        openDialog(
+                          { type: "task", task: null },
+                          event.currentTarget,
+                        )
+                      }
+                      disabled={projects.length === 0}
+                      className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Plus size={15} aria-hidden="true" />
+                      Lägg till uppgift
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mb-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_150px_150px_180px_150px_auto]">
@@ -571,18 +601,32 @@ export function WorkspaceDashboard({
                     </button>
                   )}
                 </div>
-                <TaskTable
-                  tasks={filteredTasks}
-                  totalTasks={tasks.length}
-                  onEditTask={(task) =>
-                    openDialog(
-                      { type: "task", task },
-                      document.activeElement instanceof HTMLElement
-                        ? document.activeElement
-                        : document.body,
-                    )
-                  }
-                />
+                {view === "table" ? (
+                  <TaskTable
+                    tasks={filteredTasks}
+                    totalTasks={tasks.length}
+                    onEditTask={(task) =>
+                      openDialog(
+                        { type: "task", task },
+                        document.activeElement instanceof HTMLElement
+                          ? document.activeElement
+                          : document.body,
+                      )
+                    }
+                  />
+                ) : (
+                  <KanbanBoard
+                    filteredTasks={filteredTasks}
+                    onEdit={(task) =>
+                      openDialog(
+                        { type: "task", task },
+                        document.activeElement instanceof HTMLElement
+                          ? document.activeElement
+                          : document.body,
+                      )
+                    }
+                  />
+                )}
               </section>
             </>
           )}

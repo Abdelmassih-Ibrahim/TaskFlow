@@ -336,3 +336,48 @@ export async function deleteTask(
 
   return actionSuccess("Uppgiften har tagits bort.");
 }
+
+export async function updateTaskStatusAction(
+  _previousState: WorkspaceActionState,
+  formData: FormData,
+): Promise<WorkspaceActionState> {
+  const taskId = getFormString(formData, "id");
+  const newStatusRaw = getFormString(formData, "status");
+
+  if (!taskId || !newStatusRaw) {
+    return actionError("Uppgift och status krävs.");
+  }
+
+  const validStatuses = ["todo", "in_progress", "done"] as const;
+  if (!validStatuses.includes(newStatusRaw as typeof validStatuses[number])) {
+    return actionError("Ogiltig status.");
+  }
+
+  const newStatus = newStatusRaw as typeof validStatuses[number];
+
+  const context = await getAuthenticatedClient();
+  if (!context) return actionError("Din session har gått ut. Logga in igen.");
+
+  const existingTask = await findOwnedTask(context.supabase, taskId);
+  if (!existingTask) return actionError("Uppgiften är inte tillgänglig.");
+
+  const isOwner = await findOwnedProject(
+    context.supabase,
+    existingTask.project_id,
+    context.user.id,
+  );
+  if (!isOwner) return actionError("Uppgiften är inte tillgänglig.");
+
+  const { data, error } = await context.supabase
+    .from("tasks")
+    .update({ status: newStatus })
+    .eq("id", taskId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    return actionError("Det gick inte att uppdatera uppgiften. Försök igen.");
+  }
+
+  return actionSuccess("Uppgiften har uppdaterats.");
+}
