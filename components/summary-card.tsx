@@ -16,7 +16,7 @@ export function SummaryCard({
   iconClass,
 }: SummaryCardProps) {
   return (
-    <article className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-shadow hover:shadow-[0_4px_16px_rgba(15,23,42,0.06)] sm:p-5">
+    <article className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.05)] transition-shadow hover:shadow-[0_8px_20px_rgba(79,70,229,0.08)] sm:p-5">
       <div className="flex items-start justify-between">
         <span
           className={`inline-flex size-10 items-center justify-center rounded-xl ${iconClass}`}

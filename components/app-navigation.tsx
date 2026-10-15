@@ -48,11 +48,11 @@ function SidebarContent({
   return (
     <>
       <div className="flex h-[76px] items-center gap-3 px-6">
-        <span className="flex size-9 items-center justify-center rounded-xl bg-teal-400 text-slate-950 shadow-sm shadow-teal-950/20">
+        <span className="flex size-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-950/20">
           <Command size={19} strokeWidth={2.6} aria-hidden="true" />
         </span>
         <span className="text-[17px] font-semibold tracking-tight text-white">
-          taskflow<span className="text-teal-400">.</span>
+          taskflow<span className="text-indigo-300">.</span>
         </span>
       </div>
 
@@ -92,7 +92,7 @@ function SidebarContent({
                 <Icon
                   size={17}
                   aria-hidden="true"
-                  className={active ? "text-teal-300" : "text-slate-500"}
+                  className={active ? "text-indigo-300" : "text-slate-500"}
                 />
                 {label}
               </Link>
@@ -226,8 +226,8 @@ export function AppNavigation({ email }: { email: string }) {
     <>
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col bg-[#111827] lg:flex">
         <SidebarContent email={email} />
-        <div className="mx-4 mb-4 flex items-center gap-2 rounded-lg bg-teal-400/[0.08] px-3 py-2.5 text-[11px] text-teal-100/80">
-          <Sparkles size={14} aria-hidden="true" className="text-teal-300" />
+        <div className="mx-4 mb-4 flex items-center gap-2 rounded-lg bg-indigo-600/[0.08] px-3 py-2.5 text-[11px] text-indigo-100/80">
+          <Sparkles size={14} aria-hidden="true" className="text-indigo-400" />
           En lugn plats för fokuserat arbete
         </div>
       </aside>
@@ -248,10 +248,10 @@ export function AppNavigation({ email }: { email: string }) {
           href="#dashboard"
           className="flex items-center gap-2 text-[16px] font-semibold tracking-tight text-slate-900"
         >
-          <span className="flex size-7 items-center justify-center rounded-lg bg-teal-400 text-slate-950">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-indigo-600 text-white">
             <Command size={15} strokeWidth={2.6} aria-hidden="true" />
           </span>
-          taskflow<span className="-ml-2 text-teal-600">.</span>
+          taskflow<span className="-ml-2 text-indigo-600">.</span>
         </Link>
         <span aria-hidden="true" className="size-10" />
       </div>

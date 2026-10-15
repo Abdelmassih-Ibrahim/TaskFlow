@@ -32,13 +32,13 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid #2dd4bf;
+  outline: 3px solid #4f46e5;
   outline-offset: 3px;
 }
 
 ::selection {
-  background: #ccfbf1;
-  color: #134e4a;
+  background: #e0e7ff;
+  color: #3730a3;
 }
 
 @media (prefers-reduced-motion: reduce) {

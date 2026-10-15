@@ -16,7 +16,7 @@ type AuthFormProps = {
 };
 
 const inputClassName =
-  "mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-950 shadow-sm placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20";
+  "mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-950 shadow-sm placeholder:text-slate-400 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20";
 
 function AuthFeedback({
   state,
@@ -40,7 +40,7 @@ function AuthFeedback({
       className={`mb-5 rounded-lg border px-3.5 py-3 text-sm leading-5 ${
         isError
           ? "border-rose-200 bg-rose-50 text-rose-800"
-          : "border-teal-200 bg-teal-50 text-teal-900"
+          : "border-indigo-200 bg-indigo-50 text-indigo-900"
       }`}
     >
       {message}
@@ -68,16 +68,16 @@ export function AuthForm({
           href="/login"
           className="mb-7 inline-flex items-center gap-2.5 rounded-md text-slate-900"
         >
-          <span className="flex size-9 items-center justify-center rounded-xl bg-teal-400 text-slate-950 shadow-sm">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
             <Command size={19} strokeWidth={2.6} aria-hidden="true" />
           </span>
           <span className="text-lg font-semibold tracking-tight">
-            taskflow<span className="text-teal-600">.</span>
+            taskflow<span className="text-indigo-600">.</span>
           </span>
         </Link>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_50px_-32px_rgba(15,23,42,0.35)] sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">
             En arbetsyta med fokus
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
@@ -210,7 +210,7 @@ export function AuthForm({
             {isSignUp ? "Har du redan ett konto?" : "Ny på TaskFlow?"}{" "}
             <Link
               href={isSignUp ? "/login" : "/register"}
-              className="font-semibold text-teal-800 underline decoration-teal-300 underline-offset-4 hover:text-teal-950"
+              className="font-semibold text-indigo-700 underline decoration-indigo-300 underline-offset-4 hover:text-indigo-900"
             >
               {isSignUp ? "Logga in" : "Skapa ett konto"}
             </Link>
