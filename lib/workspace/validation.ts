@@ -80,3 +80,39 @@ export const initialWorkspaceActionState: WorkspaceActionState = {
   status: "idle",
   message: "",
 };
+
+const roleEnum = z.enum(["viewer", "editor", "admin", "reporter"]);
+
+export const inviteMemberSchema = z
+  .object({
+    projectId: projectIdSchema,
+    email: z.string().email("Ange en giltig e-postadress."),
+    role: roleEnum,
+  })
+  .strict();
+
+export const acceptInvitationSchema = z
+  .object({
+    token: z.string().min(1, "En inbjudningstoken krävs."),
+  })
+  .strict();
+
+export const updateMemberRoleSchema = z
+  .object({
+    projectId: projectIdSchema,
+    userId: z.string().uuid("Välj en giltig användare."),
+    role: roleEnum,
+  })
+  .strict();
+
+export const removeMemberSchema = z
+  .object({
+    projectId: projectIdSchema,
+    userId: z.string().uuid("Välj en giltig användare."),
+  })
+  .strict();
+
+export type InviteMemberFormValues = z.output<typeof inviteMemberSchema>;
+export type AcceptInvitationFormValues = z.output<typeof acceptInvitationSchema>;
+export type UpdateMemberRoleFormValues = z.output<typeof updateMemberRoleSchema>;
+export type RemoveMemberFormValues = z.output<typeof removeMemberSchema>;
