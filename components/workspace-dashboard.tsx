@@ -25,8 +25,6 @@ import {
 } from "@/lib/workspace/dashboard";
 import type {
   Project,
-  ProjectMember,
-  Sprint,
   TaskPriority,
   TaskStatus,
   TaskWithProject,

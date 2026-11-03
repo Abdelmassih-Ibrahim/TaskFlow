@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { TaskWithProject } from '@/lib/workspace/types';
 import {
+  type CalendarDay,
   getWeeksInMonth,
   formatMonthYear,
   getPreviousMonth,
@@ -50,7 +51,7 @@ function CalendarDay({
   day,
   onEdit,
 }: {
-  day: any;
+  day: CalendarDay;
   onEdit: (task: TaskWithProject) => void;
 }) {
   const bgClass = !day.isCurrentMonth
@@ -80,7 +81,7 @@ function CalendarDay({
   );
 }
 
-export function CalendarContent({ projects, tasks, error }: WorkspaceData) {
+export function CalendarContent({ tasks, error }: WorkspaceData) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const handleEdit = (task: TaskWithProject) => {

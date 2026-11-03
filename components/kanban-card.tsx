@@ -31,8 +31,7 @@ interface KanbanCardProps {
   onEdit: (task: TaskWithProject) => void;
 }
 
-export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
-  ({ task, assigneeEmail, onEdit }, ref) => {
+export function KanbanCard({ task, assigneeEmail, onEdit }: KanbanCardProps) {
     const {
       attributes,
       listeners,

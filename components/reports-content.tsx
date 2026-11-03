@@ -22,7 +22,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-export function ReportsContent({ projects, tasks, error }: WorkspaceData) {
+export function ReportsContent({ tasks, error }: WorkspaceData) {
   const [period, setPeriod] = useState<ReportPeriod>('month');
   const scopedTasks = useMemo(() => filterTasksByPeriod(tasks, period), [tasks, period]);
   const summary = useMemo(() => getWorkspaceSummary(scopedTasks), [scopedTasks]);

@@ -51,7 +51,7 @@ export function getDaysInMonth(date: Date, tasks: TaskWithProject[]): CalendarDa
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  let current = new Date(startDate);
+  const current = new Date(startDate);
   while (current <= lastDay || current.getDay() !== 0) {
     const dateStr = toDateKey(current);
     const isCurrentMonth = current.getMonth() === month;
