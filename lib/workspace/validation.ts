@@ -28,6 +28,13 @@ export const updateProjectSchema = z
   })
   .strict();
 
+const optionalUuid = (message: string) =>
+  z
+    .string()
+    .trim()
+    .transform((value) => value || null)
+    .refine((value) => value === null || z.uuid().safeParse(value).success, message);
+
 const taskFields = {
   projectId: projectIdSchema,
   title: z
@@ -45,6 +52,20 @@ const taskFields = {
     .refine(
       (value) => value === null || z.iso.date().safeParse(value).success,
       "Ange ett giltigt förfallodatum.",
+    ),
+  assigneeId: optionalUuid("Välj en giltig person."),
+  sprintId: optionalUuid("Välj en giltig sprint."),
+  labels: z
+    .string()
+    .transform((value) =>
+      value
+        .split(",")
+        .map((label) => label.trim())
+        .filter(Boolean),
+    )
+    .refine(
+      (labels) => labels.length <= 10 && labels.every((label) => label.length <= 30),
+      "Högst 10 etiketter, och högst 30 tecken per etikett.",
     ),
 };
 
@@ -65,7 +86,19 @@ export type TaskFormValues = z.output<typeof createTaskSchema>;
 
 export type WorkspaceFieldErrors = Partial<
   Record<
-    "name" | "description" | "title" | "projectId" | "status" | "priority" | "dueDate",
+    | "name"
+    | "description"
+    | "title"
+    | "projectId"
+    | "status"
+    | "priority"
+    | "dueDate"
+    | "assigneeId"
+    | "sprintId"
+    | "labels"
+    | "startsOn"
+    | "endsOn"
+    | "body",
     string
   >
 >;
