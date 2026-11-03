@@ -570,6 +570,17 @@ export function WorkspaceDashboard({
                       <Plus size={15} aria-hidden="true" />
                       Lägg till uppgift
                     </button>
+                    <button
+                      type="button"
+                      onClick={(event) =>
+                        openDialog({ type: "sprint" }, event.currentTarget)
+                      }
+                      disabled={projects.length === 0}
+                      className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Plus size={15} aria-hidden="true" />
+                      Ny sprint
+                    </button>
                   </div>
                 </div>
 
@@ -714,7 +725,7 @@ export function WorkspaceDashboard({
                     </button>
                   )}
                 </div>
-                {(selectedProject || overdueOnly) && (
+                {(selectedProject || selectedSprint || overdueOnly) && (
                   <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-slate-600">
                     <span className="text-slate-500">Aktiva filter:</span>
                     {selectedProject && (
@@ -727,6 +738,27 @@ export function WorkspaceDashboard({
                         <X size={12} aria-hidden="true" />
                         <span className="sr-only">Ta bort projektfiltret</span>
                       </button>
+                    )}
+                    {selectedSprint && (
+                      <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 py-1 pl-3 pr-1 text-xs font-medium text-indigo-800">
+                        Sprint: {selectedSprint.name}
+                        <button
+                          type="button"
+                          onClick={() => setSprintFilter("all")}
+                          className="inline-flex items-center rounded-full p-0.5 hover:bg-indigo-100"
+                        >
+                          <X size={12} aria-hidden="true" />
+                          <span className="sr-only">Ta bort sprintfiltret</span>
+                        </button>
+                        <DeleteRecordButton
+                          key={selectedSprint.id}
+                          id={selectedSprint.id}
+                          label="Ta bort sprint"
+                          ariaLabel={`Ta bort sprinten ${selectedSprint.name}`}
+                          confirmMessage={`Ta bort sprinten ”${selectedSprint.name}”? Uppgifterna ligger kvar utan sprint.`}
+                          action={deleteSprint}
+                        />
+                      </span>
                     )}
                     {overdueOnly && (
                       <button
@@ -757,6 +789,7 @@ export function WorkspaceDashboard({
                 ) : (
                   <KanbanBoard
                     filteredTasks={filteredTasks}
+                    members={members}
                     onEdit={(task) =>
                       openDialog(
                         { type: "task", task },
@@ -785,8 +818,13 @@ export function WorkspaceDashboard({
           key={activeDialog.task?.id ?? "new-task"}
           task={activeDialog.task}
           projects={projects}
+          members={members}
+          sprints={sprints}
           onClose={closeDialog}
         />
+      )}
+      {activeDialog?.type === "sprint" && (
+        <SprintDialog projects={projects} onClose={closeDialog} />
       )}
     </>
   );
