@@ -110,7 +110,11 @@ export function TaskTable({
             {tasks.map((task) => {
               const overdue = isWorkspaceTaskOverdue(task, today);
               return (
-                <tr key={task.id} className="transition-colors hover:bg-slate-50/70">
+                <tr
+                  key={task.id}
+                  onClick={() => onEditTask(task)}
+                  className="cursor-pointer transition-colors hover:bg-slate-50/70"
+                >
                   <th scope="row" className="px-5 py-3.5 text-left">
                     <div className="flex items-center gap-2.5">
                       <span className={`shrink-0 ${task.status === "done" ? "text-emerald-600" : task.status === "in_progress" ? "text-blue-600" : "text-slate-300"}`}>
@@ -144,7 +148,7 @@ export function TaskTable({
                       {statusLabels[task.status]}
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-right">
+                  <td className="px-3 py-3 text-right" onClick={(event) => event.stopPropagation()}>
                     <TaskActions task={task} onEdit={onEditTask} />
                   </td>
                 </tr>
@@ -158,7 +162,11 @@ export function TaskTable({
         {tasks.map((task) => {
           const overdue = isWorkspaceTaskOverdue(task, today);
           return (
-            <li key={task.id} className="space-y-3 px-4 py-4">
+            <li
+              key={task.id}
+              onClick={() => onEditTask(task)}
+              className="cursor-pointer space-y-3 px-4 py-4 active:bg-slate-50"
+            >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-start gap-2.5">
                   <span className={`mt-0.5 shrink-0 ${task.status === "done" ? "text-emerald-600" : task.status === "in_progress" ? "text-blue-600" : "text-slate-300"}`}>
