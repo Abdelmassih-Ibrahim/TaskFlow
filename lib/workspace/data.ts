@@ -81,12 +81,12 @@ export async function getProjectMembers(
       .from("project_members")
       .select("*")
       .eq("project_id", projectId)
-      .is("joined_at", "not.is.null"),
+      .not("joined_at", "is", null),
     supabase
       .from("invitations")
       .select("*")
       .eq("project_id", projectId)
-      .is("accepted_at", "is.null"),
+      .is("accepted_at", null),
   ]);
 
   return {

@@ -1,5 +1,6 @@
 'use client';
 
+import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import type { TaskWithProject, TaskStatus } from '@/lib/workspace/types';
 import { KanbanCard } from './kanban-card';
@@ -12,8 +13,15 @@ interface KanbanColumnProps {
 }
 
 export function KanbanColumn({ status, label, tasks, onEdit }: KanbanColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({ id: status });
+
   return (
-    <div className="flex flex-col h-full bg-slate-50 rounded-lg overflow-hidden">
+    <div
+      ref={setNodeRef}
+      className={`flex flex-col h-full rounded-lg overflow-hidden transition-colors ${
+        isOver ? 'bg-indigo-50 ring-2 ring-indigo-300' : 'bg-slate-50'
+      }`}
+    >
       {/* Header */}
       <div className="sticky top-0 bg-white border-b border-slate-200 px-4 py-3 z-10">
         <div className="flex items-center justify-between">

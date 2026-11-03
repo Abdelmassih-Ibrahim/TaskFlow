@@ -13,6 +13,13 @@ export interface CalendarWeek {
   days: CalendarDay[];
 }
 
+export function toDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function groupTasksByDueDate(tasks: TaskWithProject[]): Map<string, TaskWithProject[]> {
   const map = new Map<string, TaskWithProject[]>();
 
@@ -46,7 +53,7 @@ export function getDaysInMonth(date: Date, tasks: TaskWithProject[]): CalendarDa
 
   let current = new Date(startDate);
   while (current <= lastDay || current.getDay() !== 0) {
-    const dateStr = current.toISOString().split('T')[0];
+    const dateStr = toDateKey(current);
     const isCurrentMonth = current.getMonth() === month;
     const isToday = current.getTime() === today.getTime();
 
@@ -80,7 +87,7 @@ export function getWeeksInMonth(date: Date, tasks: TaskWithProject[]): CalendarW
 }
 
 export function getTasksForDay(tasks: TaskWithProject[], date: Date): TaskWithProject[] {
-  const dateStr = date.toISOString().split('T')[0];
+  const dateStr = toDateKey(date);
   return tasks.filter((task) => task.due_date === dateStr);
 }
 

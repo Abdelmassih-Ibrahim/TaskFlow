@@ -3,12 +3,13 @@
 import {
   DndContext,
   DragEndEvent,
-  DragStartEvent,
-  closestCorners,
+  KeyboardSensor,
   PointerSensor,
+  closestCorners,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useState, useTransition } from 'react';
 import type { TaskWithProject, TaskStatus } from '@/lib/workspace/types';
 import type { WorkspaceActionState } from '@/lib/workspace/validation';
@@ -21,53 +22,56 @@ interface KanbanBoardProps {
   onEdit: (task: TaskWithProject) => void;
 }
 
+type PendingStatuses = {
+  base: TaskWithProject[];
+  statuses: Record<string, TaskStatus>;
+};
+
 export function KanbanBoard({ filteredTasks, onEdit }: KanbanBoardProps) {
-  const [optimisticTasks, setOptimisticTasks] = useState<TaskWithProject[]>(filteredTasks);
-  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [pending, setPending] = useState<PendingStatuses>({ base: filteredTasks, statuses: {} });
   const [, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const tasksByStatus = groupTasksByStatus(optimisticTasks);
+  const pendingStatuses = pending.base === filteredTasks ? pending.statuses : {};
+  const displayedTasks = filteredTasks.map((task) =>
+    pendingStatuses[task.id] ? { ...task, status: pendingStatuses[task.id] } : task,
+  );
+  const tasksByStatus = groupTasksByStatus(displayedTasks);
 
   const sensors = useSensors(
-    useSensor(PointerSensor)
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setDraggedTaskId(event.active.id as string);
+  const handleDragStart = () => {
     setError(null);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    setDraggedTaskId(null);
-
-    if (!over || active.id === over.id) {
-      return;
-    }
+    if (!over) return;
 
     const taskId = active.id as string;
-    const newStatus = over.id as TaskStatus;
-
-    if (!isValidTargetStatus(newStatus)) {
-      return;
-    }
-
-    const task = optimisticTasks.find((t) => t.id === taskId);
+    const task = displayedTasks.find((t) => t.id === taskId);
     if (!task) return;
 
-    if (task.status === newStatus) {
-      return;
-    }
+    const targetStatus = isValidTargetStatus(over.id)
+      ? over.id
+      : displayedTasks.find((t) => t.id === over.id)?.status;
+    if (!targetStatus || task.status === targetStatus) return;
 
-    setOptimisticTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
-    );
+    setPending((prev) => ({
+      base: filteredTasks,
+      statuses: {
+        ...(prev.base === filteredTasks ? prev.statuses : {}),
+        [taskId]: targetStatus,
+      },
+    }));
 
     startTransition(async () => {
       const formData = new FormData();
       formData.append('id', taskId);
-      formData.append('status', newStatus);
+      formData.append('status', targetStatus);
 
       const result = (await updateTaskStatusAction(
         { status: 'idle' } as WorkspaceActionState,
@@ -75,7 +79,11 @@ export function KanbanBoard({ filteredTasks, onEdit }: KanbanBoardProps) {
       )) as WorkspaceActionState;
 
       if (result.status === 'error') {
-        setOptimisticTasks(filteredTasks);
+        setPending((prev) => {
+          const statuses = { ...prev.statuses };
+          delete statuses[taskId];
+          return { base: filteredTasks, statuses };
+        });
         setError(result.message || 'Kunde inte uppdatera uppgiften');
       }
     });
@@ -84,7 +92,7 @@ export function KanbanBoard({ filteredTasks, onEdit }: KanbanBoardProps) {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg text-sm">
+        <div role="alert" className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg text-sm">
           {error}
         </div>
       )}
@@ -99,9 +107,9 @@ export function KanbanBoard({ filteredTasks, onEdit }: KanbanBoardProps) {
           {KANBAN_COLUMNS.map((column) => (
             <KanbanColumn
               key={column.id}
-              status={column.id as TaskStatus}
+              status={column.id}
               label={column.label}
-              tasks={tasksByStatus[column.id as TaskStatus] || []}
+              tasks={tasksByStatus[column.id]}
               onEdit={onEdit}
             />
           ))}
