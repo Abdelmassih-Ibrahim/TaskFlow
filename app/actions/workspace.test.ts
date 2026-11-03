@@ -42,6 +42,7 @@ function createQueryBuilder(): QueryBuilder {
 
   builder.select = vi.fn(() => builder);
   builder.eq = vi.fn(() => builder);
+  builder.not = vi.fn(() => builder);
   builder.maybeSingle = vi.fn(() => Promise.resolve(nextResult()));
   builder.insert = vi.fn(() => builder);
   builder.update = vi.fn(() => builder);
@@ -124,11 +125,8 @@ describe("workspace server actions", () => {
     expect(builders).toHaveLength(0);
   });
 
-  it("creates a task only after verifying ownership of its project", async () => {
-    enqueue(
-      { data: ownedProject, error: null },
-      { data: null, error: null },
-    );
+  it("creates a task when the user is an editor or admin of the project", async () => {
+    enqueue({ data: { role: "editor" }, error: null }, { data: null, error: null });
 
     const result = await createTask(
       initialWorkspaceActionState,
@@ -139,22 +137,49 @@ describe("workspace server actions", () => {
         status: "todo",
         priority: "high",
         dueDate: "",
+        assigneeId: "",
+        sprintId: "",
+        labels: "release, viktigt",
       }),
     );
 
     expect(result).toMatchObject({ status: "success" });
-    expect(builders[1].insert).toHaveBeenCalledWith({
-      project_id: ownedProject.id,
-      title: "Prepare release",
-      description: null,
-      status: "todo",
-      priority: "high",
-      due_date: null,
-    });
+    expect(builders[1].insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        project_id: ownedProject.id,
+        title: "Prepare release",
+        description: null,
+        status: "todo",
+        priority: "high",
+        due_date: null,
+        assignee_id: null,
+        sprint_id: null,
+        labels: ["release", "viktigt"],
+      }),
+    );
   });
 
-  it("rejects tasks assigned to a project not owned by the current user", async () => {
+  it("rejects task creation for users who are not members of the project", async () => {
     enqueue({ data: null, error: null });
+
+    const result = await createTask(
+      initialWorkspaceActionState,
+      form({
+        projectId: ownedProject.id,
+        title: "Prepare release",
+        description: "",
+        status: "todo",
+        priority: "medium",
+        dueDate: "",
+      }),
+    );
+
+    expect(result).toMatchObject({ status: "error" });
+    expect(builders).toHaveLength(1);
+  });
+
+  it("rejects viewers and reporters from creating tasks", async () => {
+    enqueue({ data: { role: "viewer" }, error: null });
 
     const result = await createTask(
       initialWorkspaceActionState,
@@ -196,10 +221,11 @@ describe("workspace server actions", () => {
     expect(builders[1].eq).toHaveBeenNthCalledWith(2, "owner_id", user.id);
   });
 
-  it("updates a task only when both its current and target projects are owned", async () => {
+  it("updates a task only when the user can edit both its current and target projects", async () => {
     enqueue(
       { data: ownedTask, error: null },
-      { data: ownedProject, error: null },
+      { data: { role: "admin" }, error: null },
+      { data: { role: "editor" }, error: null },
       { data: { id: ownedTask.id }, error: null },
     );
 
@@ -213,24 +239,33 @@ describe("workspace server actions", () => {
         status: "in_progress",
         priority: "medium",
         dueDate: "",
+        assigneeId: "",
+        sprintId: "",
+        labels: "",
       }),
     );
 
     expect(result).toMatchObject({ status: "success" });
     expect(builders[0].select).toHaveBeenCalledWith("id, project_id");
-    expect(builders[2].update).toHaveBeenCalledWith({
-      project_id: ownedProject.id,
-      title: "Updated task",
-      description: null,
-      status: "in_progress",
-      priority: "medium",
-      due_date: null,
-    });
+    expect(builders[3].update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        project_id: ownedProject.id,
+        title: "Updated task",
+        description: null,
+        status: "in_progress",
+        priority: "medium",
+        due_date: null,
+        assignee_id: null,
+        sprint_id: null,
+        labels: [],
+      }),
+    );
   });
 
-  it("rejects moving a task to a project not owned by the current user", async () => {
+  it("rejects moving a task to a project where the user cannot edit", async () => {
     enqueue(
       { data: ownedTask, error: null },
+      { data: { role: "admin" }, error: null },
       { data: null, error: null },
     );
 
@@ -248,8 +283,8 @@ describe("workspace server actions", () => {
     );
 
     expect(result).toMatchObject({ status: "error" });
-    expect(builders).toHaveLength(2);
-    expect(builders[1].update).not.toHaveBeenCalled();
+    expect(builders).toHaveLength(3);
+    expect(builders[2].update).not.toHaveBeenCalled();
   });
 
   it("deletes an owned project and its tasks through the schema cascade", async () => {
@@ -268,10 +303,10 @@ describe("workspace server actions", () => {
     expect(builders[1].eq).toHaveBeenNthCalledWith(2, "owner_id", user.id);
   });
 
-  it("deletes a task only after checking ownership through its project", async () => {
+  it("deletes a task only for project admins", async () => {
     enqueue(
       { data: ownedTask, error: null },
-      { data: ownedProject, error: null },
+      { data: { role: "admin" }, error: null },
       { data: { id: ownedTask.id }, error: null },
     );
 
@@ -282,5 +317,20 @@ describe("workspace server actions", () => {
 
     expect(result).toMatchObject({ status: "success" });
     expect(builders[2].delete).toHaveBeenCalledOnce();
+  });
+
+  it("does not let editors delete tasks", async () => {
+    enqueue(
+      { data: ownedTask, error: null },
+      { data: { role: "editor" }, error: null },
+    );
+
+    const result = await deleteTask(
+      initialWorkspaceActionState,
+      form({ id: ownedTask.id }),
+    );
+
+    expect(result).toMatchObject({ status: "error" });
+    expect(builders).toHaveLength(2);
   });
 });

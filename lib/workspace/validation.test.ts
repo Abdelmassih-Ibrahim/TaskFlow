@@ -39,6 +39,9 @@ describe("task input validation", () => {
         status: "in_progress",
         priority: "high",
         dueDate: "",
+        assigneeId: "",
+        sprintId: "",
+        labels: " backend, , bugg ",
       }),
     ).toEqual({
       projectId: validProjectId,
@@ -47,6 +50,9 @@ describe("task input validation", () => {
       status: "in_progress",
       priority: "high",
       dueDate: null,
+      assigneeId: null,
+      sprintId: null,
+      labels: ["backend", "bugg"],
     });
     expect(
       createTaskSchema.safeParse({
@@ -56,6 +62,9 @@ describe("task input validation", () => {
         status: "blocked",
         priority: "urgent",
         dueDate: "2026-02-30",
+        assigneeId: "",
+        sprintId: "",
+        labels: "",
       }).success,
     ).toBe(false);
   });
@@ -70,6 +79,9 @@ describe("task input validation", () => {
         status: "todo",
         priority: "medium",
         dueDate: "",
+        assigneeId: "",
+        sprintId: "",
+        labels: "",
         ownerId: "spoofed",
       }).success,
     ).toBe(false);

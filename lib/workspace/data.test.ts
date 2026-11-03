@@ -43,6 +43,7 @@ function createQueryBuilder(result: QueryResult): QueryBuilder {
   builder.select = vi.fn(() => builder);
   builder.order = vi.fn(() => builder);
   builder.in = vi.fn(() => builder);
+  builder.not = vi.fn(() => builder);
   builder.then = (
     resolve: (value: QueryResult) => unknown,
     reject?: (reason: unknown) => unknown,
@@ -54,9 +55,17 @@ beforeEach(() => {
   const builders = [
     createQueryBuilder({ data: projects, error: null }),
     createQueryBuilder({ data: tasks, error: null }),
+    createQueryBuilder({ data: [], error: null }),
+    createQueryBuilder({ data: [], error: null }),
   ];
   let index = 0;
   mocks.serverClient = {
+    auth: {
+      getUser: vi.fn(async () => ({
+        data: { user: { id: "authenticated-user", email: "ada@example.com" } },
+        error: null,
+      })),
+    },
     from: vi.fn(() => builders[index++]),
   };
 });
@@ -66,6 +75,7 @@ describe("workspace data access", () => {
     const result = await getWorkspaceData();
 
     expect(result.error).toBeNull();
+    expect(result.currentUserId).toBe("authenticated-user");
     expect(result.projects).toEqual(projects);
     expect(result.tasks).toEqual([
       {
@@ -73,6 +83,8 @@ describe("workspace data access", () => {
         project: { id: projects[0].id, name: projects[0].name },
       },
     ]);
+    expect(result.members).toEqual([]);
+    expect(result.sprints).toEqual([]);
   });
 
   it("returns an explicit configuration error when Supabase is unavailable", async () => {

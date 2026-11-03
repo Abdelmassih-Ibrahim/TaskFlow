@@ -8,6 +8,8 @@ export type TaskFilters = {
   projectId: string;
   sort: "due_date" | "title" | "priority" | "status";
   overdueOnly?: boolean;
+  sprint?: "all" | "backlog" | string;
+  assignee?: "all" | "none" | string;
 };
 
 export type WorkspaceSummary = {
@@ -87,10 +89,22 @@ export function filterAndSortTasks(
       !search ||
       task.title.toLocaleLowerCase().includes(search) ||
       (task.description ?? "").toLocaleLowerCase().includes(search) ||
-      task.project.name.toLocaleLowerCase().includes(search);
+      task.project.name.toLocaleLowerCase().includes(search) ||
+      task.labels.some((label) => label.toLocaleLowerCase().includes(search));
+
+    const sprintOk =
+      !filters.sprint ||
+      filters.sprint === "all" ||
+      (filters.sprint === "backlog" ? !task.sprint_id : task.sprint_id === filters.sprint);
+    const assigneeOk =
+      !filters.assignee ||
+      filters.assignee === "all" ||
+      (filters.assignee === "none" ? !task.assignee_id : task.assignee_id === filters.assignee);
 
     return (
       matchesSearch &&
+      sprintOk &&
+      assigneeOk &&
       (filters.status === "all" || task.status === filters.status) &&
       (filters.priority === "all" || task.priority === filters.priority) &&
       (!filters.projectId || task.project_id === filters.projectId) &&
