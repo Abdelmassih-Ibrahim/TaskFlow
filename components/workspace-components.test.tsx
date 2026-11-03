@@ -109,6 +109,7 @@ const emptyWorkspace: WorkspaceData = {
 };
 
 beforeEach(() => {
+  Element.prototype.scrollIntoView = vi.fn();
   Object.values(mocks).forEach((mock) => {
     mock.mockReset();
     mock.mockResolvedValue(initialWorkspaceActionState);
