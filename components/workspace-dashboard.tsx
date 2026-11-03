@@ -629,18 +629,40 @@ export function WorkspaceDashboard({
                   {hasFilters && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setSearch("");
-                        setStatus("all");
-                        setPriority("all");
-                        setProjectId("");
-                      }}
+                      onClick={clearFilters}
                       className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
                     >
                       Rensa filter
                     </button>
                   )}
                 </div>
+                {(selectedProject || overdueOnly) && (
+                  <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+                    <span className="text-slate-500">Aktiva filter:</span>
+                    {selectedProject && (
+                      <button
+                        type="button"
+                        onClick={() => setProjectId("")}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-800 hover:bg-indigo-100"
+                      >
+                        Projekt: {selectedProject.name}
+                        <X size={12} aria-hidden="true" />
+                        <span className="sr-only">Ta bort projektfiltret</span>
+                      </button>
+                    )}
+                    {overdueOnly && (
+                      <button
+                        type="button"
+                        onClick={() => setOverdueOnly(false)}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-medium text-rose-800 hover:bg-rose-100"
+                      >
+                        Endast försenade
+                        <X size={12} aria-hidden="true" />
+                        <span className="sr-only">Ta bort filtret för försenade</span>
+                      </button>
+                    )}
+                  </div>
+                )}
                 {view === "table" ? (
                   <TaskTable
                     tasks={filteredTasks}
