@@ -4,10 +4,13 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { Database } from "../../lib/supabase/database.types";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
+import type { MemberRole } from "../../lib/workspace/types";
 import {
   createProjectSchema,
+  createSprintSchema,
   createTaskSchema,
   deleteRecordSchema,
+  reorderTasksSchema,
   updateProjectSchema,
   updateTaskSchema,
   type WorkspaceActionState,
@@ -19,6 +22,21 @@ type AuthenticatedClient = {
   user: User;
 };
 
+const fieldNames = [
+  "name",
+  "description",
+  "title",
+  "projectId",
+  "status",
+  "priority",
+  "dueDate",
+  "assigneeId",
+  "sprintId",
+  "labels",
+  "startsOn",
+  "endsOn",
+] as const;
+
 function getFormString(formData: FormData, name: string): string {
   const value = formData.get(name);
   return typeof value === "string" ? value : "";
@@ -28,15 +46,6 @@ function getIssueErrors(
   issues: { path: PropertyKey[]; message: string }[],
 ): WorkspaceFieldErrors {
   const errors: WorkspaceFieldErrors = {};
-  const fieldNames = [
-    "name",
-    "description",
-    "title",
-    "projectId",
-    "status",
-    "priority",
-    "dueDate",
-  ] as const;
 
   for (const issue of issues) {
     const field = issue.path[0];
@@ -94,7 +103,32 @@ async function findOwnedProject(
   return !error && data !== null;
 }
 
-async function findOwnedTask(
+async function getProjectRole(
+  supabase: SupabaseClient<Database>,
+  projectId: string,
+  userId: string,
+): Promise<MemberRole | null> {
+  const { data, error } = await supabase
+    .from("project_members")
+    .select("role")
+    .eq("project_id", projectId)
+    .eq("user_id", userId)
+    .not("joined_at", "is", null)
+    .maybeSingle();
+
+  return error || !data ? null : data.role;
+}
+
+async function canEditProject(
+  supabase: SupabaseClient<Database>,
+  projectId: string,
+  userId: string,
+): Promise<boolean> {
+  const role = await getProjectRole(supabase, projectId, userId);
+  return role === "admin" || role === "editor";
+}
+
+async function findTask(
   supabase: SupabaseClient<Database>,
   taskId: string,
 ): Promise<{ id: string; project_id: string } | null> {
@@ -105,6 +139,14 @@ async function findOwnedTask(
     .maybeSingle();
 
   return error ? null : data;
+}
+
+async function isProjectMember(
+  supabase: SupabaseClient<Database>,
+  projectId: string,
+  userId: string,
+): Promise<boolean> {
+  return (await getProjectRole(supabase, projectId, userId)) !== null;
 }
 
 export async function createProject(
@@ -203,9 +245,63 @@ export async function deleteProject(
     return actionError("Det gick inte att ta bort projektet. Försök igen.");
   }
 
-  return actionSuccess(
-    "Projektet och dess uppgifter har tagits bort.",
-  );
+  return actionSuccess("Projektet och dess uppgifter har tagits bort.");
+}
+
+export async function createSprint(
+  _previousState: WorkspaceActionState,
+  formData: FormData,
+): Promise<WorkspaceActionState> {
+  const parsed = createSprintSchema.safeParse({
+    projectId: getFormString(formData, "projectId"),
+    name: getFormString(formData, "name"),
+    startsOn: getFormString(formData, "startsOn"),
+    endsOn: getFormString(formData, "endsOn"),
+  });
+  if (!parsed.success) return validationFailure(parsed.error.issues);
+
+  const context = await getAuthenticatedClient();
+  if (!context) return actionError("Din session har gått ut. Logga in igen.");
+
+  const role = await getProjectRole(context.supabase, parsed.data.projectId, context.user.id);
+  if (role !== "admin") return actionError("Bara administratörer kan skapa sprintar.");
+
+  const { error } = await context.supabase.from("sprints").insert({
+    project_id: parsed.data.projectId,
+    name: parsed.data.name,
+    starts_on: parsed.data.startsOn,
+    ends_on: parsed.data.endsOn,
+  });
+
+  if (error) return actionError("Det gick inte att skapa sprinten. Försök igen.");
+
+  return actionSuccess("Sprinten har skapats.");
+}
+
+export async function deleteSprint(
+  _previousState: WorkspaceActionState,
+  formData: FormData,
+): Promise<WorkspaceActionState> {
+  const parsed = deleteRecordSchema.safeParse({
+    id: getFormString(formData, "id"),
+  });
+  if (!parsed.success) return validationFailure(parsed.error.issues);
+
+  const context = await getAuthenticatedClient();
+  if (!context) return actionError("Din session har gått ut. Logga in igen.");
+
+  const { data, error } = await context.supabase
+    .from("sprints")
+    .delete()
+    .eq("id", parsed.data.id)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    return actionError("Det gick inte att ta bort sprinten. Försök igen.");
+  }
+
+  return actionSuccess("Sprinten har tagits bort. Uppgifterna ligger kvar utan sprint.");
 }
 
 export async function createTask(
@@ -219,19 +315,24 @@ export async function createTask(
     status: getFormString(formData, "status"),
     priority: getFormString(formData, "priority"),
     dueDate: getFormString(formData, "dueDate"),
+    assigneeId: getFormString(formData, "assigneeId"),
+    sprintId: getFormString(formData, "sprintId"),
+    labels: getFormString(formData, "labels"),
   });
   if (!parsed.success) return validationFailure(parsed.error.issues);
 
   const context = await getAuthenticatedClient();
   if (!context) return actionError("Din session har gått ut. Logga in igen.");
 
-  const isOwner = await findOwnedProject(
-    context.supabase,
-    parsed.data.projectId,
-    context.user.id,
-  );
-  if (!isOwner) {
-    return actionError("Välj ett projekt i din arbetsyta.");
+  if (!(await canEditProject(context.supabase, parsed.data.projectId, context.user.id))) {
+    return actionError("Du har inte behörighet att skapa uppgifter i detta projekt.");
+  }
+
+  if (
+    parsed.data.assigneeId &&
+    !(await isProjectMember(context.supabase, parsed.data.projectId, parsed.data.assigneeId))
+  ) {
+    return actionError("Personen är inte medlem i projektet.");
   }
 
   const { error } = await context.supabase.from("tasks").insert({
@@ -241,6 +342,10 @@ export async function createTask(
     status: parsed.data.status,
     priority: parsed.data.priority,
     due_date: parsed.data.dueDate,
+    assignee_id: parsed.data.assigneeId,
+    sprint_id: parsed.data.sprintId,
+    labels: parsed.data.labels,
+    position: Date.now(),
   });
 
   if (error) {
@@ -262,22 +367,30 @@ export async function updateTask(
     status: getFormString(formData, "status"),
     priority: getFormString(formData, "priority"),
     dueDate: getFormString(formData, "dueDate"),
+    assigneeId: getFormString(formData, "assigneeId"),
+    sprintId: getFormString(formData, "sprintId"),
+    labels: getFormString(formData, "labels"),
   });
   if (!parsed.success) return validationFailure(parsed.error.issues);
 
   const context = await getAuthenticatedClient();
   if (!context) return actionError("Din session har gått ut. Logga in igen.");
 
-  const existingTask = await findOwnedTask(context.supabase, parsed.data.id);
+  const existingTask = await findTask(context.supabase, parsed.data.id);
   if (!existingTask) return actionError("Uppgiften är inte tillgänglig.");
 
-  const isOwner = await findOwnedProject(
-    context.supabase,
-    parsed.data.projectId,
-    context.user.id,
-  );
-  if (!isOwner) {
-    return actionError("Välj ett projekt i din arbetsyta.");
+  if (
+    !(await canEditProject(context.supabase, existingTask.project_id, context.user.id)) ||
+    !(await canEditProject(context.supabase, parsed.data.projectId, context.user.id))
+  ) {
+    return actionError("Du har inte behörighet att ändra denna uppgift.");
+  }
+
+  if (
+    parsed.data.assigneeId &&
+    !(await isProjectMember(context.supabase, parsed.data.projectId, parsed.data.assigneeId))
+  ) {
+    return actionError("Personen är inte medlem i projektet.");
   }
 
   const { data, error } = await context.supabase
@@ -289,6 +402,9 @@ export async function updateTask(
       status: parsed.data.status,
       priority: parsed.data.priority,
       due_date: parsed.data.dueDate,
+      assignee_id: parsed.data.assigneeId,
+      sprint_id: parsed.data.sprintId,
+      labels: parsed.data.labels,
     })
     .eq("id", parsed.data.id)
     .select("id")
@@ -313,15 +429,13 @@ export async function deleteTask(
   const context = await getAuthenticatedClient();
   if (!context) return actionError("Din session har gått ut. Logga in igen.");
 
-  const existingTask = await findOwnedTask(context.supabase, parsed.data.id);
+  const existingTask = await findTask(context.supabase, parsed.data.id);
   if (!existingTask) return actionError("Uppgiften är inte tillgänglig.");
 
-  const isOwner = await findOwnedProject(
-    context.supabase,
-    existingTask.project_id,
-    context.user.id,
-  );
-  if (!isOwner) return actionError("Uppgiften är inte tillgänglig.");
+  const role = await getProjectRole(context.supabase, existingTask.project_id, context.user.id);
+  if (role !== "admin") {
+    return actionError("Bara administratörer kan ta bort uppgifter.");
+  }
 
   const { data, error } = await context.supabase
     .from("tasks")
@@ -337,61 +451,46 @@ export async function deleteTask(
   return actionSuccess("Uppgiften har tagits bort.");
 }
 
-export async function updateTaskStatusAction(
+export async function reorderTasks(
   _previousState: WorkspaceActionState,
   formData: FormData,
 ): Promise<WorkspaceActionState> {
-  const taskId = getFormString(formData, "id");
-  const newStatusRaw = getFormString(formData, "status");
-
-  if (!taskId || !newStatusRaw) {
-    return actionError("Uppgift och status krävs.");
+  let taskIds: unknown;
+  try {
+    taskIds = JSON.parse(getFormString(formData, "taskIds"));
+  } catch {
+    return actionError("Ogiltig ordning på uppgifterna.");
   }
 
-  const validStatuses = ["todo", "in_progress", "done"] as const;
-  if (!validStatuses.includes(newStatusRaw as typeof validStatuses[number])) {
-    return actionError("Ogiltig status.");
-  }
-
-  const newStatus = newStatusRaw as typeof validStatuses[number];
+  const parsed = reorderTasksSchema.safeParse({
+    projectId: getFormString(formData, "projectId"),
+    status: getFormString(formData, "status"),
+    taskIds,
+  });
+  if (!parsed.success) return actionError("Ogiltig ordning på uppgifterna.");
 
   const context = await getAuthenticatedClient();
   if (!context) return actionError("Din session har gått ut. Logga in igen.");
 
-  const existingTask = await findOwnedTask(context.supabase, taskId);
-  if (!existingTask) return actionError("Uppgiften är inte tillgänglig.");
+  if (!(await canEditProject(context.supabase, parsed.data.projectId, context.user.id))) {
+    return actionError("Du har inte behörighet att ändra uppgifterna i detta projekt.");
+  }
 
-  const isOwner = await findOwnedProject(
-    context.supabase,
-    existingTask.project_id,
-    context.user.id,
+  const results = await Promise.all(
+    parsed.data.taskIds.map((taskId, index) =>
+      context.supabase
+        .from("tasks")
+        .update({ status: parsed.data.status, position: index + 1 })
+        .eq("id", taskId)
+        .eq("project_id", parsed.data.projectId)
+        .select("id")
+        .maybeSingle(),
+    ),
   );
 
-  // If not owner, check if user is an editor/admin member
-  if (!isOwner) {
-    const { data: member } = await context.supabase
-      .from("project_members")
-      .select("role")
-      .eq("project_id", existingTask.project_id)
-      .eq("user_id", context.user.id)
-      .not("joined_at", "is", null)
-      .maybeSingle();
-
-    if (!member || !["editor", "admin"].includes(member.role)) {
-      return actionError("Du har inte behörighet att uppdatera denna uppgift.");
-    }
+  if (results.some((result) => result.error || !result.data)) {
+    return actionError("Det gick inte att spara ordningen. Försök igen.");
   }
 
-  const { data, error } = await context.supabase
-    .from("tasks")
-    .update({ status: newStatus })
-    .eq("id", taskId)
-    .select("id")
-    .maybeSingle();
-
-  if (error || !data) {
-    return actionError("Det gick inte att uppdatera uppgiften. Försök igen.");
-  }
-
-  return actionSuccess("Uppgiften har uppdaterats.");
+  return actionSuccess("Uppgifterna har uppdaterats.");
 }
