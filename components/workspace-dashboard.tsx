@@ -573,7 +573,7 @@ export function WorkspaceDashboard({
                   </div>
                 </div>
 
-                <div className="mb-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_150px_150px_180px_150px_auto]">
+                <div className="mb-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(200px,1.2fr)_130px_130px_150px_150px_160px_150px_auto]">
                   <label className="relative block">
                     <span className="sr-only">Sök uppgifter</span>
                     <Search
@@ -647,6 +647,41 @@ export function WorkspaceDashboard({
                       {projects.map((project) => (
                         <option key={project.id} value={project.id}>
                           {project.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    <span className="sr-only">Filtrera efter sprint</span>
+                    <select
+                      aria-label="Filtrera efter sprint"
+                      value={sprintFilter}
+                      onChange={(event) => setSprintFilter(event.target.value)}
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+                    >
+                      <option value="all">Alla sprintar</option>
+                      <option value="backlog">Backlogg</option>
+                      {projectSprints.map((sprint) => (
+                        <option key={sprint.id} value={sprint.id}>
+                          {sprint.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    <span className="sr-only">Filtrera efter ansvarig</span>
+                    <select
+                      aria-label="Filtrera efter ansvarig"
+                      value={assigneeFilter}
+                      onChange={(event) => setAssigneeFilter(event.target.value)}
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+                    >
+                      <option value="all">Alla ansvariga</option>
+                      {currentUserId && <option value="me">Tilldelade till mig</option>}
+                      <option value="none">Ingen ansvarig</option>
+                      {assigneeOptions.map(([userId, email]) => (
+                        <option key={userId} value={userId}>
+                          {email}
                         </option>
                       ))}
                     </select>
