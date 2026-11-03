@@ -186,6 +186,14 @@ describe("workspace dashboard", () => {
       within(screen.getByRole("table")).getByText("Prepare release notes"),
     ).toBeVisible();
   });
+  it("filters the task list when a summary card is activated", () => {
+    render(<WorkspaceDashboard {...workspace} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Visa försenade uppgifter/ }));
+
+    expect(screen.getByText("Endast försenade")).toBeVisible();
+    expect(screen.getByText("Inga uppgifter matchar filtreringen")).toBeVisible();
+  });
 });
 
 describe("project and task forms", () => {
@@ -200,13 +208,23 @@ describe("project and task forms", () => {
   });
 
   it("renders the task fields, including status, priority, and due date", () => {
-    render(<TaskDialog task={null} projects={[project]} onClose={vi.fn()} />);
+    render(
+      <TaskDialog
+        task={null}
+        projects={[project]}
+        members={[]}
+        sprints={[]}
+        onClose={vi.fn()}
+      />,
+    );
 
     expect(screen.getByLabelText("Uppgiftstitel")).toBeRequired();
     expect(screen.getByLabelText("Projekt")).toHaveValue(project.id);
     expect(screen.getByLabelText("Status")).toHaveValue("todo");
     expect(screen.getByLabelText("Prioritet")).toHaveValue("medium");
     expect(screen.getByLabelText("Förfallodatum")).toHaveAttribute("type", "date");
+    expect(screen.getByLabelText("Ansvarig")).toHaveValue("");
+    expect(screen.getByLabelText("Sprint")).toHaveValue("");
   });
 
   it("associates a server validation error with the project name field", async () => {

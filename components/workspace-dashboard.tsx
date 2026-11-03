@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { deleteProject } from "@/app/actions/workspace";
+import { deleteProject, deleteSprint } from "@/app/actions/workspace";
 import { SummaryCard } from "@/components/summary-card";
 import { TaskTable } from "@/components/task-table";
 import { KanbanBoard } from "@/components/kanban-board";
@@ -25,6 +25,8 @@ import {
 } from "@/lib/workspace/dashboard";
 import type {
   Project,
+  ProjectMember,
+  Sprint,
   TaskPriority,
   TaskStatus,
   TaskWithProject,
@@ -34,12 +36,14 @@ import { taskPriorities, taskStatuses } from "@/lib/workspace/types";
 import {
   DeleteRecordButton,
   ProjectDialog,
+  SprintDialog,
   TaskDialog,
 } from "@/components/workspace-dialogs";
 
 type ActiveDialog =
   | { type: "project"; project: Project | null }
   | { type: "task"; task: TaskWithProject | null }
+  | { type: "sprint" }
   | null;
 
 function SignOutFailureNotice() {
@@ -69,8 +73,11 @@ const taskSortOptions = ["due_date", "title", "priority", "status"] as const;
 type TaskSort = (typeof taskSortOptions)[number];
 
 export function WorkspaceDashboard({
+  currentUserId,
   projects,
   tasks,
+  members,
+  sprints,
   error,
   signOutError = false,
   initialProjectId = "",
@@ -81,6 +88,8 @@ export function WorkspaceDashboard({
   const [priority, setPriority] = useState<TaskPriority | "all">("all");
   const [projectId, setProjectId] = useState(initialProjectId);
   const [overdueOnly, setOverdueOnly] = useState(false);
+  const [sprintFilter, setSprintFilter] = useState("all");
+  const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [sort, setSort] = useState<TaskSort>("due_date");
   const [view, setView] = useState<"table" | "kanban">("table");
   const [notice, setNotice] = useState<string | null>(null);
@@ -115,8 +124,13 @@ export function WorkspaceDashboard({
         projectId,
         sort,
         overdueOnly,
+        sprint: sprintFilter,
+        assignee:
+          assigneeFilter === "me"
+            ? currentUserId ?? "none"
+            : assigneeFilter,
       }),
-    [overdueOnly, priority, projectId, search, sort, status, tasks],
+    [assigneeFilter, currentUserId, overdueOnly, priority, projectId, search, sort, sprintFilter, status, tasks],
   );
   const progressByProject = useMemo(
     () =>
@@ -129,9 +143,36 @@ export function WorkspaceDashboard({
     [projects, tasks],
   );
   const hasFilters = Boolean(
-    search || projectId || status !== "all" || priority !== "all" || overdueOnly,
+    search ||
+      projectId ||
+      status !== "all" ||
+      priority !== "all" ||
+      overdueOnly ||
+      sprintFilter !== "all" ||
+      assigneeFilter !== "all",
   );
   const selectedProject = projects.find((project) => project.id === projectId);
+  const selectedSprint = sprints.find((sprint) => sprint.id === sprintFilter);
+  const projectSprints = sprints.filter((sprint) =>
+    projectId ? sprint.project_id === projectId : true,
+  );
+  const membersById = useMemo(
+    () => new Map(members.map((member) => [member.user_id, member])),
+    [members],
+  );
+  const ownedProjectIds = useMemo(
+    () => new Set(projects.filter((project) => project.owner_id === currentUserId).map((project) => project.id)),
+    [currentUserId, projects],
+  );
+  const assigneeOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const member of members) {
+      if (member.user_email && !seen.has(member.user_id)) {
+        seen.set(member.user_id, member.user_email);
+      }
+    }
+    return [...seen.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [members]);
 
   const scrollToTasks = () => {
     document
@@ -144,6 +185,8 @@ export function WorkspaceDashboard({
     setPriority("all");
     setProjectId("");
     setOverdueOnly(false);
+    setSprintFilter("all");
+    setAssigneeFilter("all");
   };
 
   const today = new Date();
