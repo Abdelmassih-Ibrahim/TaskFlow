@@ -98,12 +98,12 @@ export function TaskTable({
         <table className="w-full min-w-[900px] border-collapse text-left">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/70">
-              <th scope="col" className="w-[31%] px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Uppgift</th>
-              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Projekt</th>
-              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Förfallodatum</th>
-              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Prioritet</th>
-              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Status</th>
-              <th scope="col" className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">Åtgärder</th>
+              <th scope="col" className="w-[31%] px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Uppgift</th>
+              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Projekt</th>
+              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Förfallodatum</th>
+              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Prioritet</th>
+              <th scope="col" className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Status</th>
+              <th scope="col" className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Åtgärder</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -120,12 +120,12 @@ export function TaskTable({
                       <span className={`shrink-0 ${task.status === "done" ? "text-emerald-600" : task.status === "in_progress" ? "text-blue-600" : "text-slate-300"}`}>
                         <StatusIcon status={task.status} />
                       </span>
-                      <span className={`text-[13px] font-medium ${task.status === "done" ? "text-slate-400 line-through decoration-slate-300" : "text-slate-800"}`}>
+                      <span className={`text-[13px] font-medium ${task.status === "done" ? "text-slate-500 line-through decoration-slate-300" : "text-slate-800"}`}>
                         {task.title}
                       </span>
                     </div>
                     {task.description && (
-                      <p className="ml-6 mt-1 line-clamp-1 text-xs font-normal text-slate-400">
+                      <p className="ml-6 mt-1 line-clamp-1 text-xs font-normal text-slate-500">
                         {task.description}
                       </p>
                     )}
@@ -173,7 +173,7 @@ export function TaskTable({
                     <StatusIcon status={task.status} />
                   </span>
                   <div className="min-w-0">
-                    <p className={`break-words text-sm font-medium ${task.status === "done" ? "text-slate-400 line-through" : "text-slate-800"}`}>
+                    <p className={`break-words text-sm font-medium ${task.status === "done" ? "text-slate-500 line-through" : "text-slate-800"}`}>
                       {task.title}
                     </p>
                     {task.description && (
@@ -181,7 +181,9 @@ export function TaskTable({
                     )}
                   </div>
                 </div>
-                <TaskActions task={task} onEdit={onEditTask} />
+                <div onClick={(event) => event.stopPropagation()}>
+                  <TaskActions task={task} onEdit={onEditTask} />
+                </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                 <span className="max-w-full truncate rounded bg-slate-50 px-2 py-1">{task.project.name}</span>
@@ -200,10 +202,10 @@ export function TaskTable({
       </ul>
 
       <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3">
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-500">
           Visar {tasks.length} av {totalTasks} uppgifter
         </p>
-        <span className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+        <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
           Sparad arbetsyta
         </span>
       </div>

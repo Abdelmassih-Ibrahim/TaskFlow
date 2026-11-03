@@ -280,7 +280,7 @@ export function WorkspaceDashboard({
                   >
                     Översikt
                   </h2>
-                  <span className="text-xs font-medium text-slate-400">
+                  <span className="text-xs font-medium text-slate-500">
                     SPARADE DATA
                   </span>
                 </div>
@@ -358,7 +358,7 @@ export function WorkspaceDashboard({
                     <FolderKanban
                       size={23}
                       aria-hidden="true"
-                      className="mx-auto text-slate-400"
+                      className="mx-auto text-slate-500"
                     />
                     <h3 className="mt-3 text-sm font-semibold text-slate-800">
                       Börja med ett projekt
@@ -536,7 +536,7 @@ export function WorkspaceDashboard({
                     <Search
                       size={16}
                       aria-hidden="true"
-                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
                     />
                     <input
                       type="search"
