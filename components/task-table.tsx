@@ -4,7 +4,7 @@ import {
   isWorkspaceTaskOverdue,
 } from "@/lib/workspace/dashboard";
 import { deleteTask } from "@/app/actions/workspace";
-import type { TaskWithProject } from "@/lib/workspace/types";
+import type { ProjectMember, TaskWithProject } from "@/lib/workspace/types";
 import { DeleteRecordButton } from "./workspace-dialogs";
 
 const statusStyles = {
@@ -68,15 +68,20 @@ function TaskActions({
 
 export function TaskTable({
   tasks,
+  members,
   totalTasks,
   today = new Date(),
   onEditTask,
 }: {
   tasks: TaskWithProject[];
+  members: ProjectMember[];
   totalTasks: number;
   today?: Date;
   onEditTask: (task: TaskWithProject) => void;
 }) {
+  const assigneeEmailFor = (userId: string | null) =>
+    userId ? members.find((member) => member.user_id === userId)?.user_email ?? null : null;
+
   if (tasks.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-white px-5 py-12 text-center">
@@ -129,8 +134,24 @@ export function TaskTable({
                         {task.description}
                       </p>
                     )}
+                    {task.labels.length > 0 && (
+                      <div className="ml-6 mt-1.5 flex flex-wrap gap-1">
+                        {task.labels.map((label) => (
+                          <span key={label} className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-700">
+                            {label}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </th>
-                  <td className="px-4 py-3.5 text-xs text-slate-500">{task.project.name}</td>
+                  <td className="px-4 py-3.5 text-xs text-slate-500">
+                    <span className="block">{task.project.name}</span>
+                    {assigneeEmailFor(task.assignee_id) && (
+                      <span className="mt-0.5 block truncate text-[11px] text-slate-500">
+                        {assigneeEmailFor(task.assignee_id)}
+                      </span>
+                    )}
+                  </td>
                   <td className={`px-4 py-3.5 text-xs ${overdue ? "font-medium text-rose-600" : "text-slate-500"}`}>
                     {task.due_date ? formatDueDate(task.due_date, today) : "Inget förfallodatum"}
                     {overdue && (
