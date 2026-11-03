@@ -23,7 +23,13 @@ import {
 } from 'recharts';
 
 export function ReportsContent({ projects, tasks, error }: WorkspaceData) {
-  const [period, setPeriod] = useState<'week' | 'month' | 'all'>('month');
+  const [period, setPeriod] = useState<ReportPeriod>('month');
+  const scopedTasks = useMemo(() => filterTasksByPeriod(tasks, period), [tasks, period]);
+  const summary = useMemo(() => getWorkspaceSummary(scopedTasks), [scopedTasks]);
+  const projectReports = useMemo(() => getProjectSummaries(scopedTasks), [scopedTasks]);
+  const burndownData = useMemo(() => calculateBurndownData(scopedTasks), [scopedTasks]);
+  const velocityData = useMemo(() => calculateVelocity(scopedTasks), [scopedTasks]);
+  const statusDistribution = useMemo(() => getStatusDistribution(scopedTasks), [scopedTasks]);
 
   if (error) {
     return (
@@ -37,12 +43,6 @@ export function ReportsContent({ projects, tasks, error }: WorkspaceData) {
       </main>
     );
   }
-
-  const summary = useMemo(() => getWorkspaceSummary(tasks), [tasks]);
-  const projectReports = useMemo(() => getProjectSummaries(tasks), [tasks]);
-  const burndownData = useMemo(() => calculateBurndownData(tasks), [tasks]);
-  const velocityData = useMemo(() => calculateVelocity(tasks), [tasks]);
-  const statusDistribution = useMemo(() => getStatusDistribution(tasks), [tasks]);
 
   return (
     <main className="min-w-0 flex-1 px-5 pb-12 pt-7 sm:px-8 lg:ml-[248px] lg:px-10 lg:pt-10">

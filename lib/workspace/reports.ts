@@ -1,5 +1,31 @@
 import type { TaskWithProject } from './types';
 import { isWorkspaceTaskOverdue } from './dashboard';
+import { toDateKey } from './calendar';
+
+export type ReportPeriod = 'week' | 'month' | 'all';
+
+export function filterTasksByPeriod(tasks: TaskWithProject[], period: ReportPeriod): TaskWithProject[] {
+  if (period === 'all') return tasks;
+
+  const now = new Date();
+  let start: Date;
+  let end: Date;
+
+  if (period === 'week') {
+    const daysSinceMonday = (now.getDay() + 6) % 7;
+    start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysSinceMonday);
+    end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+  } else {
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
+    end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  }
+
+  const startKey = toDateKey(start);
+  const endKey = toDateKey(end);
+  return tasks.filter(
+    (task) => task.due_date !== null && task.due_date >= startKey && task.due_date <= endKey,
+  );
+}
 
 export interface BurndownPoint {
   date: string;
