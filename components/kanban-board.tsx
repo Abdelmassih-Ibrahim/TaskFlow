@@ -29,7 +29,7 @@ type PendingChanges = {
   positions: Record<string, number>;
 };
 
-const noPendingChanges = { statuses: {}, positions: {} };
+const noPendingChanges: Omit<PendingChanges, "base"> = { statuses: {}, positions: {} };
 
 export function KanbanBoard({ filteredTasks, members, onEdit }: KanbanBoardProps) {
   const [pending, setPending] = useState<PendingChanges>({ base: filteredTasks, statuses: {}, positions: {} });

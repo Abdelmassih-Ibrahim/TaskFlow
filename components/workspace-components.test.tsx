@@ -51,12 +51,21 @@ const project = {
   owner_id: "authenticated-user",
   name: "Website refresh",
   description: "Improve the public website.",
+  is_shared: null,
   created_at: "2026-10-01T00:00:00.000Z",
   updated_at: "2026-10-02T00:00:00.000Z",
 };
 
+const taskFields = {
+  assignee_id: null,
+  labels: [] as string[],
+  position: 0,
+  sprint_id: null,
+};
+
 const tasks = [
   {
+    ...taskFields,
     id: "17cf2d6e-054c-4cf0-a2c6-d34c6a0d27ae",
     project_id: project.id,
     project: { id: project.id, name: project.name },
@@ -69,6 +78,7 @@ const tasks = [
     updated_at: "2026-10-02T00:00:00.000Z",
   },
   {
+    ...taskFields,
     id: "82606f17-adc9-4a47-9c3b-6b58c49cfc22",
     project_id: project.id,
     project: { id: project.id, name: project.name },
