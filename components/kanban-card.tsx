@@ -5,7 +5,6 @@ import { formatDueDate, isWorkspaceTaskOverdue } from '@/lib/workspace/dashboard
 import type { TaskWithProject } from '@/lib/workspace/types';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { forwardRef } from 'react';
 
 const statusStyles = {
   todo: 'bg-slate-100 text-slate-600',
@@ -126,7 +125,4 @@ export function KanbanCard({ task, assigneeEmail, onEdit }: KanbanCardProps) {
         </button>
       </div>
     );
-  }
-);
-
-KanbanCard.displayName = 'KanbanCard';
+}
