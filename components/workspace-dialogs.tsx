@@ -90,7 +90,7 @@ function Feedback({
       className={`rounded-lg border px-3 py-2 text-sm ${
         isError
           ? "border-rose-200 bg-rose-50 text-rose-800"
-          : "border-teal-200 bg-teal-50 text-teal-900"
+          : "border-indigo-200 bg-indigo-50 text-indigo-900"
       }`}
     >
       {state.message}
@@ -113,7 +113,7 @@ function FieldError({
 }
 
 const inputClassName =
-  "mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20";
+  "mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20";
 const labelClassName = "block text-sm font-medium text-slate-800";
 
 function DialogActions({
@@ -430,7 +430,7 @@ export function DeleteRecordButton({
         <span
           role={state.status === "error" ? "alert" : "status"}
           className={`text-xs ${
-            state.status === "error" ? "text-rose-700" : "text-teal-800"
+            state.status === "error" ? "text-rose-700" : "text-indigo-800"
           }`}
         >
           {state.message}

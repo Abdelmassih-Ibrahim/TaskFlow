@@ -13,6 +13,7 @@ import {
   Table2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { deleteProject } from "@/app/actions/workspace";
 import { SummaryCard } from "@/components/summary-card";
 import { TaskTable } from "@/components/task-table";
@@ -72,12 +73,14 @@ export function WorkspaceDashboard({
   tasks,
   error,
   signOutError = false,
-}: WorkspaceData & { signOutError?: boolean }) {
+  initialProjectId = "",
+}: WorkspaceData & { signOutError?: boolean; initialProjectId?: string }) {
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<TaskStatus | "all">("all");
   const [priority, setPriority] = useState<TaskPriority | "all">("all");
-  const [projectId, setProjectId] = useState("");
+  const [projectId, setProjectId] = useState(initialProjectId);
+  const [overdueOnly, setOverdueOnly] = useState(false);
   const [sort, setSort] = useState<TaskSort>("due_date");
   const [view, setView] = useState<"table" | "kanban">("table");
   const [notice, setNotice] = useState<string | null>(null);
@@ -111,8 +114,9 @@ export function WorkspaceDashboard({
         priority,
         projectId,
         sort,
+        overdueOnly,
       }),
-    [priority, projectId, search, sort, status, tasks],
+    [overdueOnly, priority, projectId, search, sort, status, tasks],
   );
   const progressByProject = useMemo(
     () =>
@@ -125,8 +129,22 @@ export function WorkspaceDashboard({
     [projects, tasks],
   );
   const hasFilters = Boolean(
-    search || projectId || status !== "all" || priority !== "all",
+    search || projectId || status !== "all" || priority !== "all" || overdueOnly,
   );
+  const selectedProject = projects.find((project) => project.id === projectId);
+
+  const scrollToTasks = () => {
+    document
+      .getElementById("task-overview")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const clearFilters = () => {
+    setSearch("");
+    setStatus("all");
+    setPriority("all");
+    setProjectId("");
+    setOverdueOnly(false);
+  };
 
   const today = new Date();
   const greeting =
@@ -153,7 +171,7 @@ export function WorkspaceDashboard({
             <div
               role="status"
               aria-live="polite"
-              className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900"
+              className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900"
             >
               <span className="inline-flex items-center gap-2">
                 <Check size={16} aria-hidden="true" />
@@ -163,7 +181,7 @@ export function WorkspaceDashboard({
                 type="button"
                 onClick={() => setNotice(null)}
                 aria-label="Stäng meddelandet"
-                className="rounded p-1 text-teal-800 hover:bg-teal-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-700"
+                className="rounded p-1 text-indigo-800 hover:bg-indigo-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-700"
               >
                 <X size={16} aria-hidden="true" />
               </button>
@@ -195,7 +213,7 @@ export function WorkspaceDashboard({
                   </p>
                   <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-[34px]">
                     {greeting}, välkommen tillbaka
-                    <span className="text-teal-600">.</span>
+                    <span className="text-indigo-600">.</span>
                   </h1>
                   <p className="mt-2 text-[15px] text-slate-500">
                     Här är en översikt över din arbetsyta.
@@ -239,14 +257,14 @@ export function WorkspaceDashboard({
 
               <section
                 aria-label="Data för arbetsytan"
-                className="mb-7 flex items-start gap-3 rounded-xl border border-teal-100 bg-teal-50/70 px-4 py-3.5 sm:items-center"
+                className="mb-7 flex items-start gap-3 rounded-xl border border-indigo-100 bg-indigo-50/70 px-4 py-3.5 sm:items-center"
               >
-                <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 shadow-sm sm:mt-0">
+                <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-700 shadow-sm sm:mt-0">
                   <Sparkles size={16} aria-hidden="true" />
                 </span>
-                <p className="text-sm leading-6 text-teal-950">
+                <p className="text-sm leading-6 text-indigo-950">
                   <span className="font-semibold">Din sparade arbetsyta</span>
-                  <span className="text-teal-800">
+                  <span className="text-indigo-800">
                     {" "}
                     — Projekt och uppgifter lagras på ditt konto. Du har endast
                     åtkomst till projekt som du äger.
@@ -273,6 +291,11 @@ export function WorkspaceDashboard({
                     description="I alla dina projekt"
                     icon={ListTodo}
                     iconClass="bg-blue-50 text-blue-700"
+                    actionLabel="Visa alla uppgifter"
+                    onClick={() => {
+                      clearFilters();
+                      scrollToTasks();
+                    }}
                   />
                   <SummaryCard
                     label="Slutförda"
@@ -280,6 +303,12 @@ export function WorkspaceDashboard({
                     description="Uppgifter markerade som klara"
                     icon={Check}
                     iconClass="bg-emerald-50 text-emerald-700"
+                    actionLabel="Visa klara uppgifter"
+                    onClick={() => {
+                      clearFilters();
+                      setStatus("done");
+                      scrollToTasks();
+                    }}
                   />
                   <SummaryCard
                     label="Försenade"
@@ -287,6 +316,12 @@ export function WorkspaceDashboard({
                     description="Oavslutade med passerat datum"
                     icon={Clock3}
                     iconClass="bg-rose-50 text-rose-700"
+                    actionLabel="Visa försenade uppgifter"
+                    onClick={() => {
+                      clearFilters();
+                      setOverdueOnly(true);
+                      scrollToTasks();
+                    }}
                   />
                 </div>
               </section>
@@ -312,7 +347,7 @@ export function WorkspaceDashboard({
                         event.currentTarget,
                       )
                     }
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-indigo-800 hover:bg-indigo-50"
                   >
                     <Plus size={16} aria-hidden="true" />
                     Lägg till projekt
@@ -356,7 +391,12 @@ export function WorkspaceDashboard({
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <h3 className="break-words text-sm font-semibold text-slate-900">
-                              {project.name}
+                              <Link
+                                href={`/?projekt=${project.id}#task-overview`}
+                                className="rounded hover:text-indigo-700 hover:underline focus-visible:outline-offset-2"
+                              >
+                                {project.name}
+                              </Link>
                             </h3>
                             <p className="mt-1 text-xs text-slate-500">
                               {progress?.total ?? 0}{" "}
@@ -368,7 +408,7 @@ export function WorkspaceDashboard({
                           <FolderKanban
                             size={17}
                             aria-hidden="true"
-                            className="shrink-0 text-teal-700"
+                            className="shrink-0 text-indigo-700"
                           />
                         </div>
                         {progress?.total ? (
@@ -389,7 +429,7 @@ export function WorkspaceDashboard({
                                 className="h-1.5 overflow-hidden rounded-full bg-slate-100"
                               >
                                 <div
-                                  className="h-full rounded-full bg-teal-600 transition-[width] motion-reduce:transition-none"
+                                  className="h-full rounded-full bg-indigo-600 transition-[width] motion-reduce:transition-none"
                                   style={{ width: `${progress.percentage}%` }}
                                 />
                               </div>
@@ -503,7 +543,7 @@ export function WorkspaceDashboard({
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                       placeholder="Sök uppgifter eller projekt"
-                      className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                      className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
                     />
                   </label>
                   <label>
@@ -522,7 +562,7 @@ export function WorkspaceDashboard({
                         );
                         if (selectedPriority) setPriority(selectedPriority);
                       }}
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
                     >
                       <option value="all">Alla prioriteter</option>
                       <option value="high">Hög</option>
@@ -545,7 +585,7 @@ export function WorkspaceDashboard({
                         );
                         if (selectedStatus) setStatus(selectedStatus);
                       }}
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
                     >
                       <option value="all">Alla statusar</option>
                       <option value="todo">Att göra</option>
@@ -558,7 +598,7 @@ export function WorkspaceDashboard({
                     <select
                       value={projectId}
                       onChange={(event) => setProjectId(event.target.value)}
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
                     >
                       <option value="">Alla projekt</option>
                       {projects.map((project) => (
@@ -578,7 +618,7 @@ export function WorkspaceDashboard({
                         );
                         if (selectedSort) setSort(selectedSort);
                       }}
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
                     >
                       <option value="due_date">Sortera: förfallodatum</option>
                       <option value="title">Sortera: titel</option>

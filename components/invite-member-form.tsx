@@ -47,7 +47,7 @@ export function InviteMemberForm({ projectId }: InviteMemberFormProps) {
                 name="email"
                 placeholder="medlem@exempel.com"
                 required
-                className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
               />
             </div>
           </div>
@@ -60,7 +60,7 @@ export function InviteMemberForm({ projectId }: InviteMemberFormProps) {
               id="role"
               name="role"
               defaultValue="editor"
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
             >
               <option value="viewer">Betraktare - Kan bara visa</option>
               <option value="editor">Redigerare - Kan redigera uppgifter</option>
@@ -76,7 +76,7 @@ export function InviteMemberForm({ projectId }: InviteMemberFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50"
+          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
         >
           <UserPlus size={16} />
           {isPending ? 'Skickar...' : 'Skicka inbjudan'}

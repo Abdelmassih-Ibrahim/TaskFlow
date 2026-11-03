@@ -283,8 +283,8 @@ export function AppNavigation({ email }: { email: string }) {
               </button>
             </div>
             <SidebarContent email={email} onNavigate={closeMobileNavigation} />
-            <div className="mx-4 mb-4 flex items-center gap-2 rounded-lg bg-teal-400/[0.08] px-3 py-2.5 text-[11px] text-teal-100/80">
-              <Sparkles size={14} aria-hidden="true" className="text-teal-300" />
+            <div className="mx-4 mb-4 flex items-center gap-2 rounded-lg bg-indigo-400/[0.08] px-3 py-2.5 text-[11px] text-indigo-100/80">
+              <Sparkles size={14} aria-hidden="true" className="text-indigo-300" />
               En lugn plats för fokuserat arbete
             </div>
           </aside>

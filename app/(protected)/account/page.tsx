@@ -18,7 +18,7 @@ export default async function AccountPage() {
   return (
     <main className="min-w-0 px-5 pb-12 pt-7 sm:px-8 lg:ml-[248px] lg:px-10 lg:pt-10">
       <div className="max-w-2xl">
-        <Link href="/" className="text-sm font-medium text-teal-700 underline-offset-4 hover:underline">
+        <Link href="/" className="text-sm font-medium text-indigo-700 underline-offset-4 hover:underline">
           Tillbaka till översikten
         </Link>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-900">

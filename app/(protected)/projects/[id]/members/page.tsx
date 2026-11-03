@@ -69,7 +69,7 @@ export default function ProjectMembersPage({ project, isOwner }: ProjectMembersP
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-[34px]">
                 Lagmedlemmar
-                <span className="text-teal-600">.</span>
+                <span className="text-indigo-600">.</span>
               </h1>
               <p className="mt-1 text-[15px] text-slate-500">{project.name}</p>
             </div>

@@ -58,7 +58,7 @@ export function MembersList({
                   <select
                     value={member.role}
                     onChange={(e) => onChangeRole(member.user_id, e.target.value)}
-                    className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+                    className="rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
                   >
                     <option value="viewer">Betraktare</option>
                     <option value="editor">Redigerare</option>

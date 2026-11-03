@@ -7,6 +7,7 @@ export type TaskFilters = {
   priority: TaskPriority | "all";
   projectId: string;
   sort: "due_date" | "title" | "priority" | "status";
+  overdueOnly?: boolean;
 };
 
 export type WorkspaceSummary = {
@@ -92,7 +93,8 @@ export function filterAndSortTasks(
       matchesSearch &&
       (filters.status === "all" || task.status === filters.status) &&
       (filters.priority === "all" || task.priority === filters.priority) &&
-      (!filters.projectId || task.project_id === filters.projectId)
+      (!filters.projectId || task.project_id === filters.projectId) &&
+      (!filters.overdueOnly || isWorkspaceTaskOverdue(task))
     );
   });
 

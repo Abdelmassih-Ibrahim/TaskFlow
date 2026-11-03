@@ -101,7 +101,7 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
         {/* Action button */}
         <button
           onClick={() => onEdit(task)}
-          className="mt-2 w-full text-left text-xs text-teal-600 hover:bg-teal-50 px-2 py-1 rounded transition-colors"
+          className="mt-2 w-full text-left text-xs text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded transition-colors"
         >
           Redigera
         </button>

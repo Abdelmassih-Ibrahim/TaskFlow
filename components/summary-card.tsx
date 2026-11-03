@@ -6,7 +6,12 @@ interface SummaryCardProps {
   description: string;
   icon: LucideIcon;
   iconClass: string;
+  onClick?: () => void;
+  actionLabel?: string;
 }
+
+const baseClass =
+  "block w-full rounded-xl border border-slate-200/60 bg-white p-5 text-left shadow-[0_1px_3px_rgba(15,23,42,0.05)] transition-shadow";
 
 export function SummaryCard({
   label,
@@ -14,9 +19,11 @@ export function SummaryCard({
   description,
   icon: Icon,
   iconClass,
+  onClick,
+  actionLabel,
 }: SummaryCardProps) {
-  return (
-    <article className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.05)] transition-shadow hover:shadow-[0_8px_20px_rgba(79,70,229,0.08)] sm:p-5">
+  const content = (
+    <>
       <div className="flex items-start justify-between">
         <span
           className={`inline-flex size-10 items-center justify-center rounded-xl ${iconClass}`}
@@ -32,11 +39,29 @@ export function SummaryCard({
         <p className="text-[32px] font-semibold leading-none tracking-tight text-slate-950">
           {value}
         </p>
-        <p className="text-right text-xs text-slate-400">{description}</p>
+        <p className="text-right text-xs text-slate-500">{description}</p>
       </div>
-      <p className="mt-3 text-xs text-slate-400">
-        Baserat på dina sparade uppgifter
-      </p>
+      {actionLabel && (
+        <p className="mt-3 text-xs font-medium text-indigo-700">{actionLabel} →</p>
+      )}
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`${baseClass} cursor-pointer hover:border-indigo-200 hover:shadow-[0_8px_20px_rgba(79,70,229,0.10)] focus-visible:outline-offset-2`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <article className={`${baseClass} hover:shadow-[0_8px_20px_rgba(79,70,229,0.08)]`}>
+      {content}
     </article>
   );
 }
