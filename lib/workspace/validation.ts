@@ -124,12 +124,6 @@ export const inviteMemberSchema = z
   })
   .strict();
 
-export const acceptInvitationSchema = z
-  .object({
-    token: z.string().min(1, "En inbjudningstoken krävs."),
-  })
-  .strict();
-
 export const updateMemberRoleSchema = z
   .object({
     projectId: projectIdSchema,
@@ -145,7 +139,44 @@ export const removeMemberSchema = z
   })
   .strict();
 
-export type InviteMemberFormValues = z.output<typeof inviteMemberSchema>;
-export type AcceptInvitationFormValues = z.output<typeof acceptInvitationSchema>;
-export type UpdateMemberRoleFormValues = z.output<typeof updateMemberRoleSchema>;
-export type RemoveMemberFormValues = z.output<typeof removeMemberSchema>;
+const optionalDate = z
+  .string()
+  .trim()
+  .transform((value) => value || null)
+  .refine((value) => value === null || z.iso.date().safeParse(value).success, "Ange ett giltigt datum.");
+
+export const createSprintSchema = z
+  .object({
+    projectId: projectIdSchema,
+    name: z
+      .string()
+      .trim()
+      .min(1, "Ange ett sprintnamn.")
+      .max(80, "Sprintnamnet får innehålla högst 80 tecken."),
+    startsOn: optionalDate,
+    endsOn: optionalDate,
+  })
+  .strict()
+  .refine(
+    (sprint) => !sprint.startsOn || !sprint.endsOn || sprint.startsOn <= sprint.endsOn,
+    { path: ["endsOn"], message: "Slutdatum måste vara efter startdatum." },
+  );
+
+export const commentSchema = z
+  .object({
+    taskId: recordIdSchema,
+    body: z
+      .string()
+      .trim()
+      .min(1, "Skriv en kommentar.")
+      .max(2000, "Kommentaren får innehålla högst 2000 tecken."),
+  })
+  .strict();
+
+export const reorderTasksSchema = z
+  .object({
+    projectId: projectIdSchema,
+    status: z.enum(taskStatuses),
+    taskIds: z.array(recordIdSchema).max(500),
+  })
+  .strict();
