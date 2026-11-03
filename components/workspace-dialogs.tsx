@@ -4,14 +4,27 @@ import {
   useActionState,
   useEffect,
   useRef,
+  useState,
 } from "react";
 import {
+  addComment,
+  deleteComment,
+  loadTaskHistory,
+  type TaskHistory,
+} from "@/app/actions/comments";
+import {
   createProject,
+  createSprint,
   createTask,
   updateProject,
   updateTask,
 } from "@/app/actions/workspace";
-import type { Project, TaskWithProject } from "@/lib/workspace/types";
+import type {
+  Project,
+  ProjectMember,
+  Sprint,
+  TaskWithProject,
+} from "@/lib/workspace/types";
 import {
   initialWorkspaceActionState,
   type WorkspaceActionState,
@@ -57,7 +70,7 @@ function WorkspaceDialog({
       onClick={(event) => {
         if (!busy && event.target === event.currentTarget) onClose();
       }}
-      className="m-auto w-[min(560px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/50"
+      className="m-auto w-[min(640px,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/50"
     >
       <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
         <h2 id="workspace-dialog-title" className="text-lg font-semibold">
@@ -195,7 +208,7 @@ export function ProjectDialog({
           </div>
           <div>
             <label htmlFor="project-description" className={labelClassName}>
-              Beskrivning <span className="font-normal text-slate-400">Valfritt</span>
+              Beskrivning <span className="font-normal text-slate-500">Valfritt</span>
             </label>
             <textarea
               id="project-description"
@@ -228,10 +241,14 @@ export function ProjectDialog({
 export function TaskDialog({
   task,
   projects,
+  members,
+  sprints,
   onClose,
 }: {
   task: TaskWithProject | null;
   projects: Project[];
+  members: ProjectMember[];
+  sprints: Sprint[];
   onClose: (successMessage?: string) => void;
 }) {
   const action = task ? updateTask : createTask;
@@ -239,17 +256,30 @@ export function TaskDialog({
     action,
     initialWorkspaceActionState,
   );
+  const [projectId, setProjectId] = useState(task?.project_id ?? projects[0]?.id ?? "");
+  const [assigneeId, setAssigneeId] = useState(task?.assignee_id ?? "");
+  const [sprintId, setSprintId] = useState(task?.sprint_id ?? "");
 
   useEffect(() => {
     if (state.status === "success") onClose(state.message);
   }, [onClose, state.message, state.status]);
 
   const errors: WorkspaceFieldErrors = state.fieldErrors ?? {};
+  const projectMembers = members.filter((member) => member.project_id === projectId);
+  const projectSprints = sprints.filter((sprint) => sprint.project_id === projectId);
+
+  const changeProject = (nextProjectId: string) => {
+    setProjectId(nextProjectId);
+    if (!members.some((member) => member.project_id === nextProjectId && member.user_id === assigneeId)) {
+      setAssigneeId("");
+    }
+    setSprintId("");
+  };
 
   return (
     <WorkspaceDialog
       title={task ? "Redigera uppgift" : "Skapa en uppgift"}
-      description="Fyll i uppgiften och välj vilket projekt den tillhör."
+      description="Fyll i uppgiften, välj ansvarig och projekt."
       busy={pending}
       onClose={onClose}
     >
@@ -276,7 +306,7 @@ export function TaskDialog({
           </div>
           <div>
             <label htmlFor="task-description" className={labelClassName}>
-              Beskrivning <span className="font-normal text-slate-400">Valfritt</span>
+              Beskrivning <span className="font-normal text-slate-500">Valfritt</span>
             </label>
             <textarea
               id="task-description"
@@ -295,28 +325,53 @@ export function TaskDialog({
               message={errors.description}
             />
           </div>
-          <div>
-            <label htmlFor="task-project" className={labelClassName}>
-              Projekt
-            </label>
-            <select
-              id="task-project"
-              name="projectId"
-              required
-              defaultValue={task?.project_id ?? projects[0]?.id ?? ""}
-              aria-invalid={Boolean(errors.projectId)}
-              aria-describedby={
-                errors.projectId ? "task-project-error" : undefined
-              }
-              className={inputClassName}
-            >
-              {projects.map((projectOption) => (
-                <option key={projectOption.id} value={projectOption.id}>
-                  {projectOption.name}
-                </option>
-              ))}
-            </select>
-            <FieldError id="task-project-error" message={errors.projectId} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="task-project" className={labelClassName}>
+                Projekt
+              </label>
+              <select
+                id="task-project"
+                name="projectId"
+                required
+                value={projectId}
+                onChange={(event) => changeProject(event.target.value)}
+                aria-invalid={Boolean(errors.projectId)}
+                aria-describedby={
+                  errors.projectId ? "task-project-error" : undefined
+                }
+                className={inputClassName}
+              >
+                {projects.map((projectOption) => (
+                  <option key={projectOption.id} value={projectOption.id}>
+                    {projectOption.name}
+                  </option>
+                ))}
+              </select>
+              <FieldError id="task-project-error" message={errors.projectId} />
+            </div>
+            <div>
+              <label htmlFor="task-assignee" className={labelClassName}>
+                Ansvarig
+              </label>
+              <select
+                id="task-assignee"
+                name="assigneeId"
+                value={assigneeId}
+                onChange={(event) => setAssigneeId(event.target.value)}
+                aria-invalid={Boolean(errors.assigneeId)}
+                aria-describedby={errors.assigneeId ? "task-assignee-error" : undefined}
+                className={inputClassName}
+              >
+                <option value="">Ingen</option>
+                {projectMembers.map((member) => (
+                  <option key={member.user_id} value={member.user_id}>
+                    {member.user_email ?? "Okänd e-post"}
+                  </option>
+                ))}
+              </select>
+              <FieldError id="task-assignee-error" message={errors.assigneeId} />
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
@@ -372,13 +427,257 @@ export function TaskDialog({
                 }
                 className={inputClassName}
               />
+              <FieldError id="task-due-date-error" message={errors.dueDate} />
             </div>
           </div>
-          <FieldError id="task-due-date-error" message={errors.dueDate} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="task-sprint" className={labelClassName}>
+                Sprint
+              </label>
+              <select
+                id="task-sprint"
+                name="sprintId"
+                value={sprintId}
+                onChange={(event) => setSprintId(event.target.value)}
+                aria-invalid={Boolean(errors.sprintId)}
+                aria-describedby={errors.sprintId ? "task-sprint-error" : undefined}
+                className={inputClassName}
+              >
+                <option value="">Backlogg (ingen sprint)</option>
+                {projectSprints.map((sprint) => (
+                  <option key={sprint.id} value={sprint.id}>
+                    {sprint.name}
+                  </option>
+                ))}
+              </select>
+              <FieldError id="task-sprint-error" message={errors.sprintId} />
+            </div>
+            <div>
+              <label htmlFor="task-labels" className={labelClassName}>
+                Etiketter <span className="font-normal text-slate-500">Kommaseparerade</span>
+              </label>
+              <input
+                id="task-labels"
+                name="labels"
+                type="text"
+                placeholder="backend, bugg"
+                defaultValue={task?.labels.join(", ") ?? ""}
+                aria-invalid={Boolean(errors.labels)}
+                aria-describedby={errors.labels ? "task-labels-error" : undefined}
+                className={inputClassName}
+              />
+              <FieldError id="task-labels-error" message={errors.labels} />
+            </div>
+          </div>
         </div>
         <DialogActions
           pending={pending}
           submitLabel={task ? "Spara ändringar" : "Skapa uppgift"}
+          onClose={onClose}
+        />
+      </form>
+      {task && <TaskHistoryPanel taskId={task.id} members={members} />}
+    </WorkspaceDialog>
+  );
+}
+
+function formatActivityDate(value: string): string {
+  return new Date(value).toLocaleString("sv-SE", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+}
+
+function TaskHistoryPanel({
+  taskId,
+  members,
+}: {
+  taskId: string;
+  members: ProjectMember[];
+}) {
+  const [history, setHistory] = useState<TaskHistory | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [commentState, commentAction, commentPending] = useActionState(
+    addComment,
+    initialWorkspaceActionState,
+  );
+  const [deleteState, deleteAction] = useActionState(
+    deleteComment,
+    initialWorkspaceActionState,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    loadTaskHistory(taskId).then((result) => {
+      if (cancelled) return;
+      setHistory(result);
+      setLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [taskId, commentState, deleteState]);
+
+  const emailFor = (userId: string | null) =>
+    members.find((member) => member.user_id === userId)?.user_email ?? "Okänd användare";
+
+  return (
+    <section aria-labelledby="task-history-heading" className="space-y-5 border-t border-slate-100 px-5 py-5 sm:px-6">
+      <h3 id="task-history-heading" className="text-sm font-semibold text-slate-900">
+        Kommentarer
+      </h3>
+
+      {!loaded && <p className="text-sm text-slate-500">Laddar...</p>}
+      {loaded && !history && (
+        <p className="text-sm text-slate-500">Historiken kunde inte läsas in.</p>
+      )}
+
+      {history && (
+        <ul className="space-y-3">
+          {history.comments.length === 0 && (
+            <li className="text-sm text-slate-500">Inga kommentarer ännu.</li>
+          )}
+          {history.comments.map((comment) => (
+            <li key={comment.id} className="rounded-lg bg-slate-50 px-3 py-2.5">
+              <div className="flex items-center justify-between gap-2 text-xs text-slate-500">
+                <span className="font-medium text-slate-700">{emailFor(comment.author_id)}</span>
+                <span>{formatActivityDate(comment.created_at)}</span>
+              </div>
+              <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-800">{comment.body}</p>
+              <form action={deleteAction} className="mt-1 text-right">
+                <input type="hidden" name="id" value={comment.id} />
+                <button type="submit" className="text-xs font-medium text-slate-500 hover:text-rose-700">
+                  Ta bort
+                </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <form action={commentAction} className="space-y-2">
+        <input type="hidden" name="taskId" value={taskId} />
+        <label htmlFor="task-comment" className={labelClassName}>
+          Ny kommentar
+        </label>
+        <textarea
+          id="task-comment"
+          name="body"
+          rows={2}
+          maxLength={2000}
+          required
+          className={inputClassName}
+        />
+        <Feedback state={commentState} />
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={commentPending}
+            className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+          >
+            {commentPending ? "Skickar..." : "Kommentera"}
+          </button>
+        </div>
+      </form>
+
+      {history && history.activity.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900">Aktivitet</h3>
+          <ul className="mt-2 space-y-1.5">
+            {history.activity.map((entry) => (
+              <li key={entry.id} className="text-xs text-slate-600">
+                <span className="font-medium text-slate-800">{emailFor(entry.actor_id)}</span>{" "}
+                {entry.message} · {formatActivityDate(entry.created_at)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function SprintDialog({
+  projects,
+  onClose,
+}: {
+  projects: Project[];
+  onClose: (successMessage?: string) => void;
+}) {
+  const [state, formAction, pending] = useActionState(
+    createSprint,
+    initialWorkspaceActionState,
+  );
+
+  useEffect(() => {
+    if (state.status === "success") onClose(state.message);
+  }, [onClose, state.message, state.status]);
+
+  const errors: WorkspaceFieldErrors = state.fieldErrors ?? {};
+
+  return (
+    <WorkspaceDialog
+      title="Ny sprint"
+      description="Sprintar grupperar uppgifter under en tidsperiod."
+      busy={pending}
+      onClose={onClose}
+    >
+      <form action={formAction} aria-busy={pending}>
+        <div className="space-y-4 px-5 py-5 sm:px-6">
+          <Feedback state={state} />
+          <div>
+            <label htmlFor="sprint-project" className={labelClassName}>
+              Projekt
+            </label>
+            <select id="sprint-project" name="projectId" required className={inputClassName}>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="sprint-name" className={labelClassName}>
+              Sprintnamn
+            </label>
+            <input
+              id="sprint-name"
+              name="name"
+              type="text"
+              required
+              maxLength={80}
+              aria-invalid={Boolean(errors.name)}
+              className={inputClassName}
+            />
+            <FieldError id="sprint-name-error" message={errors.name} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="sprint-start" className={labelClassName}>
+                Startdatum
+              </label>
+              <input id="sprint-start" name="startsOn" type="date" className={inputClassName} />
+            </div>
+            <div>
+              <label htmlFor="sprint-end" className={labelClassName}>
+                Slutdatum
+              </label>
+              <input
+                id="sprint-end"
+                name="endsOn"
+                type="date"
+                aria-invalid={Boolean(errors.endsOn)}
+                className={inputClassName}
+              />
+              <FieldError id="sprint-end-error" message={errors.endsOn} />
+            </div>
+          </div>
+        </div>
+        <DialogActions
+          pending={pending}
+          submitLabel="Skapa sprint"
           onClose={onClose}
         />
       </form>

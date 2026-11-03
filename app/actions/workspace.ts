@@ -463,7 +463,6 @@ export async function reorderTasks(
   }
 
   const parsed = reorderTasksSchema.safeParse({
-    projectId: getFormString(formData, "projectId"),
     status: getFormString(formData, "status"),
     taskIds,
   });
@@ -472,24 +471,19 @@ export async function reorderTasks(
   const context = await getAuthenticatedClient();
   if (!context) return actionError("Din session har gått ut. Logga in igen.");
 
-  if (!(await canEditProject(context.supabase, parsed.data.projectId, context.user.id))) {
-    return actionError("Du har inte behörighet att ändra uppgifterna i detta projekt.");
-  }
-
   const results = await Promise.all(
     parsed.data.taskIds.map((taskId, index) =>
       context.supabase
         .from("tasks")
         .update({ status: parsed.data.status, position: index + 1 })
         .eq("id", taskId)
-        .eq("project_id", parsed.data.projectId)
         .select("id")
         .maybeSingle(),
     ),
   );
 
   if (results.some((result) => result.error || !result.data)) {
-    return actionError("Det gick inte att spara ordningen. Försök igen.");
+    return actionError("Du kan inte flytta alla dessa uppgifter. Ordningen sparades inte helt.");
   }
 
   return actionSuccess("Uppgifterna har uppdaterats.");

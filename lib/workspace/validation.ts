@@ -175,7 +175,6 @@ export const commentSchema = z
 
 export const reorderTasksSchema = z
   .object({
-    projectId: projectIdSchema,
     status: z.enum(taskStatuses),
     taskIds: z.array(recordIdSchema).max(500),
   })

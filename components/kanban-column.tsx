@@ -9,10 +9,11 @@ interface KanbanColumnProps {
   status: TaskStatus;
   label: string;
   tasks: TaskWithProject[];
+  assigneeEmailFor: (userId: string | null) => string | null;
   onEdit: (task: TaskWithProject) => void;
 }
 
-export function KanbanColumn({ status, label, tasks, onEdit }: KanbanColumnProps) {
+export function KanbanColumn({ status, label, tasks, assigneeEmailFor, onEdit }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
@@ -47,6 +48,7 @@ export function KanbanColumn({ status, label, tasks, onEdit }: KanbanColumnProps
               <KanbanCard
                 key={task.id}
                 task={task}
+                assigneeEmail={assigneeEmailFor(task.assignee_id)}
                 onEdit={onEdit}
               />
             ))

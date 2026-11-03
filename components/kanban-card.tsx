@@ -27,11 +27,12 @@ function StatusIcon({ status }: { status: TaskWithProject['status'] }) {
 
 interface KanbanCardProps {
   task: TaskWithProject;
+  assigneeEmail: string | null;
   onEdit: (task: TaskWithProject) => void;
 }
 
 export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
-  ({ task, onEdit }, ref) => {
+  ({ task, assigneeEmail, onEdit }, ref) => {
     const {
       attributes,
       listeners,
@@ -97,6 +98,25 @@ export const KanbanCard = forwardRef<HTMLDivElement, KanbanCardProps>(
         <div className="text-xs text-slate-500 mt-2 truncate">
           {task.project.name}
         </div>
+
+        {(task.labels.length > 0 || assigneeEmail) && (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {task.labels.map((label) => (
+              <span key={label} className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-700">
+                {label}
+              </span>
+            ))}
+            {assigneeEmail && (
+              <span
+                className="ml-auto inline-flex size-6 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-semibold text-indigo-800"
+                title={`Ansvarig: ${assigneeEmail}`}
+                aria-label={`Ansvarig: ${assigneeEmail}`}
+              >
+                {assigneeEmail.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Action button */}
         <button
