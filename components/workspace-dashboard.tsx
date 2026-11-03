@@ -156,10 +156,6 @@ export function WorkspaceDashboard({
   const projectSprints = sprints.filter((sprint) =>
     projectId ? sprint.project_id === projectId : true,
   );
-  const membersById = useMemo(
-    () => new Map(members.map((member) => [member.user_id, member])),
-    [members],
-  );
   const ownedProjectIds = useMemo(
     () => new Set(projects.filter((project) => project.owner_id === currentUserId).map((project) => project.id)),
     [currentUserId, projects],
@@ -488,25 +484,39 @@ export function WorkspaceDashboard({
                           </p>
                         )}
                         <div className="mt-3 flex flex-wrap items-center gap-1 border-t border-slate-100 pt-2">
-                          <button
-                            type="button"
-                            onClick={(event) =>
-                              openDialog(
-                                { type: "project", project },
-                                event.currentTarget,
-                              )
-                            }
-                            className="rounded-md px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                          {ownedProjectIds.has(project.id) ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={(event) =>
+                                  openDialog(
+                                    { type: "project", project },
+                                    event.currentTarget,
+                                  )
+                                }
+                                className="rounded-md px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                              >
+                                Redigera
+                              </button>
+                              <DeleteRecordButton
+                                id={project.id}
+                                label="Ta bort"
+                                ariaLabel={`Ta bort projektet ${project.name}`}
+                                confirmMessage={`Ta bort ”${project.name}” och alla dess uppgifter? Åtgärden kan inte ångras.`}
+                                action={deleteProject}
+                              />
+                            </>
+                          ) : (
+                            <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+                              Delat med dig
+                            </span>
+                          )}
+                          <Link
+                            href={`/projects/${project.id}/members`}
+                            className="ml-auto rounded-md px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50"
                           >
-                            Redigera
-                          </button>
-                          <DeleteRecordButton
-                            id={project.id}
-                            label="Ta bort"
-                            ariaLabel={`Ta bort projektet ${project.name}`}
-                            confirmMessage={`Ta bort ”${project.name}” och alla dess uppgifter? Åtgärden kan inte ångras.`}
-                            action={deleteProject}
-                          />
+                            Medlemmar
+                          </Link>
                         </div>
                         </li>
                       );
@@ -776,6 +786,7 @@ export function WorkspaceDashboard({
                 {view === "table" ? (
                   <TaskTable
                     tasks={filteredTasks}
+                    members={members}
                     totalTasks={tasks.length}
                     onEditTask={(task) =>
                       openDialog(
