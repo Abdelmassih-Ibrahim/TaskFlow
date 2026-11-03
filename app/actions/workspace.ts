@@ -374,7 +374,7 @@ export async function updateTaskStatusAction(
       .select("role")
       .eq("project_id", existingTask.project_id)
       .eq("user_id", context.user.id)
-      .is("joined_at", "not.is.null")
+      .not("joined_at", "is", null)
       .maybeSingle();
 
     if (!member || !["editor", "admin"].includes(member.role)) {

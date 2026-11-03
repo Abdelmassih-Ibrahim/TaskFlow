@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { signOut } from "@/app/actions/auth";
 
@@ -24,17 +25,15 @@ async function submitSignOut(): Promise<null> {
 }
 
 const primaryNavigation = [
-  { label: "Översikt", href: "#dashboard", icon: LayoutDashboard, active: true },
-  { label: "Mina uppgifter", href: "#task-overview", icon: CheckSquare2, active: false },
-  { label: "Projekt", href: "#projects", icon: FolderKanban, active: false },
+  { label: "Översikt", href: "/", icon: LayoutDashboard },
+  { label: "Mina uppgifter", href: "/#task-overview", icon: CheckSquare2 },
+  { label: "Projekt", href: "/#projects", icon: FolderKanban },
 ];
 
 const secondaryNavigation = [
   { label: "Rapporter", href: "/reports", icon: BarChart3 },
   { label: "Kalender", href: "/calendar", icon: CalendarDays },
 ];
-
-const unavailableNavigation = [];
 
 function SidebarContent({
   email,
@@ -44,6 +43,7 @@ function SidebarContent({
   onNavigate?: () => void;
 }) {
   const [, signOutAction, signingOut] = useActionState(submitSignOut, null);
+  const pathname = usePathname();
 
   return (
     <>
@@ -77,60 +77,60 @@ function SidebarContent({
           Arbetsyta
         </p>
         <ul className="space-y-1">
-          {primaryNavigation.map(({ label, href, icon: Icon, active }) => (
-            <li key={label}>
-              <Link
-                href={href}
-                onClick={onNavigate}
-                aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors ${
-                  active
-                    ? "bg-white/10 text-white"
-                    : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
-                }`}
-              >
-                <Icon
-                  size={17}
-                  aria-hidden="true"
-                  className={active ? "text-indigo-300" : "text-slate-500"}
-                />
-                {label}
-              </Link>
-            </li>
-          ))}
+          {primaryNavigation.map(({ label, href, icon: Icon }) => {
+            const active = pathname === href;
+            return (
+              <li key={label}>
+                <Link
+                  href={href}
+                  onClick={onNavigate}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors ${
+                    active
+                      ? "bg-white/10 text-white"
+                      : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
+                  }`}
+                >
+                  <Icon
+                    size={17}
+                    aria-hidden="true"
+                    className={active ? "text-indigo-300" : "text-slate-500"}
+                  />
+                  {label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
 
         <p className="mb-2 mt-8 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
           Organisera
         </p>
         <ul className="space-y-1">
-          {secondaryNavigation.map(({ label, href, icon: Icon }) => (
-            <li key={label}>
-              <Link
-                href={href}
-                onClick={onNavigate}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
-              >
-                <Icon size={17} aria-hidden="true" className="text-slate-500" />
-                {label}
-              </Link>
-            </li>
-          ))}
-          {unavailableNavigation.map(({ label, icon: Icon }) => (
-            <li key={label}>
-              <span
-                aria-disabled="true"
-                title={`${label} är inte tillgängligt ännu`}
-                className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-slate-500"
-              >
-                <Icon size={17} aria-hidden="true" className="text-slate-600" />
-                {label}
-                <span className="ml-auto text-[9px] font-semibold uppercase tracking-wide text-slate-600">
-                  Snart
-                </span>
-              </span>
-            </li>
-          ))}
+          {secondaryNavigation.map(({ label, href, icon: Icon }) => {
+            const active = pathname === href;
+            return (
+              <li key={label}>
+                <Link
+                  href={href}
+                  onClick={onNavigate}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors ${
+                    active
+                      ? "bg-white/10 text-white"
+                      : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"
+                  }`}
+                >
+                  <Icon
+                    size={17}
+                    aria-hidden="true"
+                    className={active ? "text-indigo-300" : "text-slate-500"}
+                  />
+                  {label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
 
@@ -245,7 +245,7 @@ export function AppNavigation({ email }: { email: string }) {
           <Menu size={21} aria-hidden="true" />
         </button>
         <Link
-          href="#dashboard"
+          href="/"
           className="flex items-center gap-2 text-[16px] font-semibold tracking-tight text-slate-900"
         >
           <span className="flex size-7 items-center justify-center rounded-lg bg-indigo-600 text-white">
