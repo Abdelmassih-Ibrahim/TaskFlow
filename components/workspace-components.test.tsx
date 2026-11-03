@@ -17,13 +17,22 @@ import { ProjectDialog, TaskDialog } from "./workspace-dialogs";
 const mocks = vi.hoisted(() => ({
   createProject: vi.fn(),
   createTask: vi.fn(),
+  createSprint: vi.fn(),
   updateProject: vi.fn(),
   updateTask: vi.fn(),
   deleteProject: vi.fn(),
   deleteTask: vi.fn(),
+  deleteSprint: vi.fn(),
+  reorderTasks: vi.fn(),
 }));
 
 vi.mock("@/app/actions/workspace", () => mocks);
+
+vi.mock("@/app/actions/comments", () => ({
+  loadTaskHistory: vi.fn(async () => ({ comments: [], activity: [] })),
+  addComment: vi.fn(async () => ({ status: "idle", message: "" })),
+  deleteComment: vi.fn(async () => ({ status: "idle", message: "" })),
+}));
 
 vi.mock("next/link", () => ({
   default: ({
@@ -74,9 +83,19 @@ const tasks = [
 ];
 
 const workspace: WorkspaceData = {
+  currentUserId: "authenticated-user",
+  currentUserEmail: "owner@example.com",
   projects: [project],
   tasks,
+  members: [],
+  sprints: [],
   error: null,
+};
+
+const emptyWorkspace: WorkspaceData = {
+  ...workspace,
+  projects: [],
+  tasks: [],
 };
 
 beforeEach(() => {
@@ -108,7 +127,7 @@ describe("workspace dashboard", () => {
   });
 
   it("shows an empty project state and disables task creation when no project exists", () => {
-    render(<WorkspaceDashboard projects={[]} tasks={[]} error={null} />);
+    render(<WorkspaceDashboard {...emptyWorkspace} />);
 
     expect(screen.getByText("Börja med ett projekt")).toBeVisible();
     expect(
@@ -120,8 +139,7 @@ describe("workspace dashboard", () => {
   it("shows a recoverable workspace error instead of empty-looking data", () => {
     render(
       <WorkspaceDashboard
-        projects={[]}
-        tasks={[]}
+        {...emptyWorkspace}
         error="Det gick inte att läsa in dina projekt. Försök igen."
       />,
     );
