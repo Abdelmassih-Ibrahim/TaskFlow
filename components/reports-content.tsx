@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Check, ListTodo, Clock3 } from 'lucide-react';
 import { getWorkspaceSummary } from '@/lib/workspace/dashboard';
-import { calculateBurndownData, calculateVelocity, getProjectSummaries, getStatusDistribution } from '@/lib/workspace/reports';
+import { calculateBurndownData, calculateVelocity, filterTasksByPeriod, getProjectSummaries, getStatusDistribution, type ReportPeriod } from '@/lib/workspace/reports';
 import { SummaryCard } from '@/components/summary-card';
 import type { WorkspaceData } from '@/lib/workspace/types';
 import {
@@ -62,7 +62,8 @@ export function ReportsContent({ projects, tasks, error }: WorkspaceData) {
             <h2 className="text-base font-semibold text-slate-900">Översikt</h2>
             <select
               value={period}
-              onChange={(e) => setPeriod(e.target.value as 'week' | 'month' | 'all')}
+              onChange={(e) => setPeriod(e.target.value as ReportPeriod)}
+              aria-label="Välj period för rapporten"
               className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
             >
               <option value="week">Denna vecka</option>
