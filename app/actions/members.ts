@@ -94,6 +94,7 @@ export async function inviteMemberToProject(
     return actionError("Det gick inte att skapa inbjudan. Försök igen.");
   }
 
+  revalidatePath(`/projects/${parsed.data.projectId}/members`);
   return actionSuccess(`Inbjudan skapad för ${email}. Kopiera länken och skicka den till personen.`);
 }
 
